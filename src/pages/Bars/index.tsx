@@ -2,15 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   APIProvider,
   Map,
-  AdvancedMarker,
+  Marker,
   InfoWindow,
   useMap,
   useMapsLibrary,
 } from '@vis.gl/react-google-maps'
 import s from './Bars.module.scss'
+import { darkMapStyle } from './mapStyle'
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? ''
-const DEFAULT_CENTER = { lat: 40.7128, lng: -74.006 } // NYC fallback
+const DEFAULT_CENTER = { lat: 40.7128, lng: -74.006 }
 const DEFAULT_ZOOM = 13
 const SEARCH_RADIUS = 3000
 
@@ -68,7 +69,6 @@ export function Bars() {
         <div className={s.mapContainer}>
           <Map
             defaultCenter={center}
-            center={loading ? undefined : center}
             defaultZoom={DEFAULT_ZOOM}
             gestureHandling="greedy"
             disableDefaultUI={false}
@@ -76,8 +76,10 @@ export function Bars() {
             streetViewControl={false}
             mapTypeControl={false}
             fullscreenControl={false}
+            style={{ width: '100%', height: '100%' }}
             className={s.map}
           >
+            <MapStyler />
             {!loading && (
               <NearbyBarsLayer center={center} />
             )}
@@ -88,6 +90,17 @@ export function Bars() {
   )
 }
 
+function MapStyler() {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map) return
+    map.setOptions({ styles: darkMapStyle })
+  }, [map])
+
+  return null
+}
+
 function NearbyBarsLayer({ center }: { center: google.maps.LatLngLiteral }) {
   const map = useMap()
   const placesLib = useMapsLibrary('places')
@@ -95,6 +108,7 @@ function NearbyBarsLayer({ center }: { center: google.maps.LatLngLiteral }) {
   const [selectedBar, setSelectedBar] = useState<BarResult | null>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
   const searched = useRef(false)
+  const autoSelected = useRef(false)
 
   useEffect(() => {
     if (!placesLib || !map || searched.current) return
@@ -149,6 +163,16 @@ function NearbyBarsLayer({ center }: { center: google.maps.LatLngLiteral }) {
     search()
   }, [placesLib, map, center])
 
+  useEffect(() => {
+    if (bars.length > 0 && map && !autoSelected.current) {
+      autoSelected.current = true
+      const first = bars[0]
+      setSelectedBar(first)
+      map.panTo(first.location)
+      map.setZoom(15)
+    }
+  }, [bars, map])
+
   const handleMarkerClick = useCallback((bar: BarResult) => {
     setSelectedBar((prev) => (prev?.id === bar.id ? null : bar))
   }, [])
@@ -160,23 +184,19 @@ function NearbyBarsLayer({ center }: { center: google.maps.LatLngLiteral }) {
       )}
 
       {bars.map((bar) => (
-        <AdvancedMarker
+        <Marker
           key={bar.id}
           position={bar.location}
           title={bar.name}
           onClick={() => handleMarkerClick(bar)}
-        >
-          <div className={s.marker}>
-            <span className={s.markerIcon}>🍸</span>
-          </div>
-        </AdvancedMarker>
+        />
       ))}
 
       {selectedBar && (
         <InfoWindow
           position={selectedBar.location}
           onCloseClick={() => setSelectedBar(null)}
-          pixelOffset={[0, -40]}
+          pixelOffset={[0, -30]}
         >
           <div className={s.infoWindow}>
             {selectedBar.photoUri && (

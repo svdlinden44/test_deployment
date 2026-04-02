@@ -1,10 +1,11 @@
 @use '../../styles/mixins' as *;
 
 .page {
-  min-height: 100vh;
+  height: 100vh;
   background: var(--dark);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .header {
@@ -33,41 +34,17 @@
 // ── Map ──
 
 .mapContainer {
-  flex: 1;
+  flex: 1 1 0;
   position: relative;
   min-height: 0;
+  overflow: hidden;
 }
 
 .map {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  min-height: calc(100vh - 11rem);
-}
-
-// ── Custom Marker ──
-
-.marker {
-  width: 38px;
-  height: 38px;
-  background: var(--gold);
-  border: 2px solid var(--dark);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 12px rgba(201, 168, 76, 0.45);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: scale(1.15);
-    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.65);
-  }
-}
-
-.markerIcon {
-  font-size: 1rem;
-  line-height: 1;
 }
 
 // ── InfoWindow ──
@@ -276,10 +253,6 @@
     border-right: none;
     border-top: 1px solid rgba(201, 168, 76, 0.15);
     border-radius: 16px 16px 0 0;
-  }
-
-  .map {
-    min-height: calc(100vh - 9rem);
   }
 
   .header {
