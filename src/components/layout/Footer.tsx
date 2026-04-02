@@ -1,0 +1,58 @@
+import { Link } from 'react-router-dom'
+import s from './Footer.module.scss'
+
+export function Footer() {
+  return (
+    <footer className={s.footer}>
+      <div className={s.inner}>
+        <div className={s.top}>
+          <div>
+            <p className={s.logo}>🥃 The Distillist</p>
+            <p className={s.tagline}>Where Every Sip Has a Story</p>
+          </div>
+
+          <div>
+            <h4 className={s.linksHeading}>Explore</h4>
+            <ul className={s.linksList}>
+              <li><Link to="/#features" className={s.link}>Features</Link></li>
+              <li><Link to="/cocktails" className={s.link}>Recipe Vault</Link></li>
+              <li><Link to="/profile" className={s.link}>Your Bar</Link></li>
+              <li><Link to="/#waitlist" className={s.link}>Early Access</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className={s.linksHeading}>Company</h4>
+            <ul className={s.linksList}>
+              <li><a href="#" className={s.link}>About Us</a></li>
+              <li><a href="#" className={s.link}>Press</a></li>
+              <li><a href="#" className={s.link}>Careers</a></li>
+              <li><a href="#" className={s.link}>Contact</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className={s.linksHeading}>Legal</h4>
+            <ul className={s.linksList}>
+              <li><a href="#" className={s.link}>Privacy Policy</a></li>
+              <li><a href="#" className={s.link}>Terms of Service</a></li>
+              <li><a href="#" className={s.link}>Cookie Policy</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className={s.bottom}>
+          <p className={s.copy}>
+            © 2025 The Distillist. Crafted with <span className={s.heart}>♥</span> for those who appreciate the finer pour.<br />
+            Drink responsibly. Must be of legal drinking age in your country.
+          </p>
+          <div className={s.socials}>
+            <a href="#" title="Instagram" className={s.socialLink}>📸</a>
+            <a href="#" title="Twitter / X" className={s.socialLink}>✖</a>
+            <a href="#" title="Pinterest" className={s.socialLink}>📌</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}

@@ -1,0 +1,101 @@
+.footer {
+  background: var(--black);
+  border-top: 1px solid rgba(201, 168, 76, 0.1);
+  padding: 4rem 2rem 2.5rem;
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.08);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+
+.tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.linksHeading {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 1rem;
+}
+
+.linksList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.link {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s;
+
+  &:hover {
+    color: var(--gold);
+  }
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.copy {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.heart {
+  color: var(--gold-dim);
+}
+
+.socials {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.socialLink {
+  font-size: 1.1rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s, transform 0.3s;
+
+  &:hover {
+    color: var(--gold);
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 768px) {
+  .top {
+    flex-direction: column;
+  }
+}

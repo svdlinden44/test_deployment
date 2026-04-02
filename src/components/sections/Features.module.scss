@@ -1,0 +1,135 @@
+@use '../../styles/mixins' as *;
+
+.section {
+  padding: 7rem 2rem;
+  background:
+    radial-gradient(ellipse 70% 50% at 0% 50%, rgba(92, 26, 14, 0.12) 0%, transparent 60%),
+    var(--dark2);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.headerReveal {
+  @include reveal;
+}
+
+.headerVisible {
+  @include visible;
+}
+
+.label {
+  @include label;
+}
+
+.title {
+  @include sectionTitle;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border: 1.5px solid rgba(201, 168, 76, 0.1);
+}
+
+.card {
+  background: var(--dark2);
+  padding: 3.5rem 2.5rem;
+  border: 1px solid rgba(201, 168, 76, 0.07);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s, border-color 0.4s;
+  cursor: default;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.05) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  &:hover {
+    background: var(--dark3);
+    border-color: rgba(201, 168, 76, 0.25);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+.cardReveal {
+  @include reveal;
+}
+
+.cardSlideLeft {
+  @include revealSlideLeft;
+}
+
+.cardSlideRight {
+  @include revealSlideRight;
+}
+
+.cardVisible {
+  @include visible;
+}
+
+.delayTwo {
+  transition-delay: 0.2s;
+}
+
+.delayThree {
+  transition-delay: 0.3s;
+}
+
+.icon {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  filter: sepia(1) saturate(3) hue-rotate(10deg) brightness(0.9);
+}
+
+.num {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  color: rgba(201, 168, 76, 0.06);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.cardTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 0.9rem;
+}
+
+.cardDesc {
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: var(--cream-dim);
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  padding: 0.3rem 0.8rem;
+  border-radius: 2px;
+}

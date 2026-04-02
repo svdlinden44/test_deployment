@@ -1,0 +1,9 @@
+@use '../../styles/mixins' as *;
+
+.primary {
+  @include btnPrimary;
+}
+
+.ghost {
+  @include btnGhost;
+}

@@ -1,0 +1,130 @@
+@use '../../styles/mixins' as *;
+
+.section {
+  padding: 9rem 2rem;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 50%, rgba(122, 59, 16, 0.2) 0%, transparent 70%),
+    var(--dark);
+}
+
+.inner {
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.reveal {
+  @include reveal;
+}
+
+.visible {
+  @include visible;
+}
+
+.label {
+  @include label;
+}
+
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 1rem;
+
+  em {
+    color: var(--gold);
+    font-style: italic;
+  }
+}
+
+.sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--cream-dim);
+  margin-bottom: 3rem;
+}
+
+.form {
+  display: flex;
+  gap: 0;
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+}
+
+.input {
+  flex: 1;
+  background: rgba(240, 230, 211, 0.05);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-right: none;
+  border-radius: 2px 0 0 2px;
+  padding: 1rem 1.4rem;
+  color: var(--cream);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.3s;
+
+  &::placeholder {
+    color: var(--muted);
+  }
+
+  &:focus {
+    border-color: rgba(201, 168, 76, 0.5);
+  }
+}
+
+.btn {
+  background: var(--gold);
+  color: var(--black);
+  border: none;
+  border-radius: 0 2px 2px 0;
+  padding: 1rem 1.8rem;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--gold-lt);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.success {
+  color: var(--gold);
+}
+
+.error {
+  color: #f87171;
+}
+
+@media (max-width: 768px) {
+  .form {
+    flex-direction: column;
+  }
+
+  .input {
+    border-right: 1px solid rgba(201, 168, 76, 0.25);
+    border-bottom: none;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .btn {
+    border-radius: 0 0 2px 2px;
+  }
+}

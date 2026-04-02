@@ -1,0 +1,93 @@
+@mixin reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+@mixin revealSlideLeft {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+@mixin revealSlideRight {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+@mixin visible {
+  opacity: 1;
+  transform: translate(0);
+}
+
+@mixin label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 1rem;
+}
+
+@mixin sectionTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1.2;
+
+  em {
+    color: var(--gold);
+    font-style: italic;
+  }
+}
+
+@mixin btnPrimary {
+  background: var(--gold);
+  color: var(--black);
+  font-family: 'Raleway', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1rem 2.4rem;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 30px rgba(201, 168, 76, 0.2);
+
+  &:hover {
+    background: var(--gold-lt);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(201, 168, 76, 0.35);
+  }
+}
+
+@mixin btnGhost {
+  background: transparent;
+  color: var(--cream);
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1rem 2.4rem;
+  border: 1px solid rgba(240, 230, 211, 0.25);
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-block;
+  transition: border-color 0.3s, color 0.3s, transform 0.3s;
+
+  &:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-2px);
+  }
+}

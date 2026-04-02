@@ -1,0 +1,55 @@
+@use '../../styles/mixins' as *;
+
+.section {
+  padding: 5rem 2rem;
+  background: var(--black);
+  border-top: 1px solid rgba(201, 168, 76, 0.08);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.08);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.item {
+  @include reveal;
+}
+
+.visible {
+  @include visible;
+}
+
+.delayTwo {
+  transition-delay: 0.2s;
+}
+
+.delayThree {
+  transition-delay: 0.3s;
+}
+
+.delayFour {
+  transition-delay: 0.4s;
+}
+
+.num {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1;
+  display: block;
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  display: block;
+}

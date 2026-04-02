@@ -1,0 +1,49 @@
+@use '../../styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--dark);
+  padding: 8rem 2rem 5rem;
+  text-align: center;
+}
+
+.inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.label {
+  @include label;
+  text-align: center;
+}
+
+.title {
+  @include sectionTitle;
+}
+
+.sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--cream-dim);
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.grid {
+  margin-top: 3rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.placeholder {
+  background: var(--dark2);
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 3px;
+  padding: 1.5rem;
+  color: var(--cream-dim);
+  font-family: 'Playfair Display', serif;
+}

@@ -1,0 +1,91 @@
+@use '../../styles/mixins' as *;
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  padding: 1.4rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, padding 0.4s, border-color 0.4s;
+  border-bottom: 1px solid transparent;
+}
+
+.scrolled {
+  background: rgba(8, 5, 3, 0.92);
+  backdrop-filter: blur(12px);
+  padding: 1rem 3rem;
+  border-color: rgba(201, 168, 76, 0.15);
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logoIcon {
+  font-size: 1.5rem;
+}
+
+.links {
+  display: flex;
+  gap: 2.2rem;
+  list-style: none;
+}
+
+.link {
+  color: var(--cream-dim);
+  text-decoration: none;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+
+  &:hover {
+    color: var(--gold);
+  }
+}
+
+.linkActive {
+  color: var(--gold);
+}
+
+.cta {
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.45rem 1.2rem;
+  border-radius: 2px;
+  transition: background 0.3s, color 0.3s;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--gold);
+    color: var(--black);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 1.2rem 1.5rem;
+  }
+  .scrolled {
+    padding: 0.8rem 1.5rem;
+  }
+  .links {
+    display: none;
+  }
+}

@@ -1,0 +1,143 @@
+@use '../../styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--dark);
+  padding: 8rem 2rem 5rem;
+}
+
+.inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 3rem;
+}
+
+.label {
+  @include label;
+}
+
+.heading {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  color: var(--cream);
+  font-size: 2.5rem;
+
+  em {
+    font-style: italic;
+    color: var(--gold);
+  }
+}
+
+.email {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--cream-dim);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.cabinet {
+  background: var(--dark2);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 4px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.cabinetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+.cabinetTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--gold);
+}
+
+.cabinetCount {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bottleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.bottleBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 3px;
+  border: 1px solid rgba(201, 168, 76, 0.08);
+  transition: all 0.3s;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.2);
+  }
+}
+
+.bottleActive {
+  border-color: rgba(201, 168, 76, 0.4);
+  background: rgba(201, 168, 76, 0.05);
+  color: var(--cream);
+}
+
+.bottleEmoji {
+  font-size: 1.8rem;
+}
+
+.bottleName {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bottleCategory {
+  font-size: 0.55rem;
+  color: var(--gold-dim);
+}
+
+.rec {
+  background: rgba(201, 168, 76, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 3px;
+  padding: 1rem;
+}
+
+.recLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 0.25rem;
+}
+
+.recTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: var(--cream);
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}

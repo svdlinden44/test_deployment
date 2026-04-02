@@ -1,0 +1,42 @@
+@use '../../styles/mixins' as *;
+
+.section {
+  padding: 8rem 2rem;
+  text-align: center;
+  background: var(--dark);
+}
+
+.reveal {
+  @include reveal;
+}
+
+.visible {
+  @include visible;
+}
+
+.label {
+  @include label;
+  text-align: center;
+}
+
+.quote {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cream);
+  line-height: 1.5;
+  max-width: 760px;
+  margin: 0 auto 2rem;
+}
+
+.highlight {
+  color: var(--gold);
+}
+
+.attr {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
