@@ -3,13 +3,13 @@
 .page {
   min-height: 100vh;
   background: var(--dark);
-  padding: 8rem 2rem 5rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
-.inner {
-  max-width: 600px;
-  margin: 0 auto;
+.header {
+  padding: 6.5rem 2rem 1.5rem;
+  text-align: center;
 }
 
 .label {
@@ -19,31 +19,270 @@
 
 .title {
   @include sectionTitle;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
 }
 
-.sub {
+.status {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
   color: var(--cream-dim);
-  font-size: 1.1rem;
-  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  margin-top: 0.75rem;
 }
 
-.grid {
-  margin-top: 3rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  opacity: 0.4;
-  pointer-events: none;
-  user-select: none;
+// ── Map ──
+
+.mapContainer {
+  flex: 1;
+  position: relative;
+  min-height: 0;
 }
 
-.placeholder {
-  background: var(--dark2);
-  border: 1px solid rgba(201, 168, 76, 0.1);
-  border-radius: 3px;
-  padding: 1.5rem;
-  color: var(--cream-dim);
+.map {
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 11rem);
+}
+
+// ── Custom Marker ──
+
+.marker {
+  width: 38px;
+  height: 38px;
+  background: var(--gold);
+  border: 2px solid var(--dark);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(201, 168, 76, 0.45);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.65);
+  }
+}
+
+.markerIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+// ── InfoWindow ──
+
+.infoWindow {
+  font-family: 'Raleway', sans-serif;
+  max-width: 280px;
+  color: #1a1a1a;
+}
+
+.infoPhoto {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.6rem;
+}
+
+.infoName {
   font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #111;
+}
+
+.infoAddress {
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.infoMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+}
+
+.infoRating {
+  color: #c9a84c;
+  font-weight: 600;
+}
+
+.infoReviews {
+  color: #999;
+}
+
+.infoPrice {
+  color: #666;
+  font-weight: 500;
+}
+
+.infoOpen {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.infoClosed {
+  color: #c62828;
+  font-weight: 500;
+}
+
+// ── Sidebar ──
+
+.sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 340px;
+  height: 100%;
+  background: rgba(15, 10, 6, 0.94);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(201, 168, 76, 0.12);
+  overflow-y: auto;
+  z-index: 10;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+}
+
+.sidebarTitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  padding: 1.2rem 1.2rem 0.8rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.08);
+}
+
+.sidebarCount {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.sidebarList {
+  list-style: none;
+}
+
+.sidebarItem {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.06);
+  transition: background 0.25s;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.06);
+  }
+}
+
+.sidebarItemActive {
+  background: rgba(201, 168, 76, 0.1);
+  border-left: 3px solid var(--gold);
+}
+
+.sidebarThumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sidebarInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.sidebarName {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebarAddr {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebarMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+}
+
+.sidebarRating {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.sidebarOpen {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.sidebarClosed {
+  color: #ef5350;
+  font-weight: 500;
+}
+
+// ── Overlay error ──
+
+.mapOverlayError {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 10, 6, 0.92);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  color: var(--cream-dim);
+  font-size: 0.82rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+}
+
+// ── Responsive ──
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40vh;
+    border-right: none;
+    border-top: 1px solid rgba(201, 168, 76, 0.15);
+    border-radius: 16px 16px 0 0;
+  }
+
+  .map {
+    min-height: calc(100vh - 9rem);
+  }
+
+  .header {
+    padding: 5.5rem 1.5rem 1rem;
+  }
 }
