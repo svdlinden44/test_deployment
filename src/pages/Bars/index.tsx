@@ -70,7 +70,6 @@ export function Bars() {
             defaultCenter={center}
             center={loading ? undefined : center}
             defaultZoom={DEFAULT_ZOOM}
-            mapId="distillist-dark-map"
             gestureHandling="greedy"
             disableDefaultUI={false}
             zoomControl={true}
