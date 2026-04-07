@@ -7,9 +7,6 @@ export function Hero() {
     <section id="hero" className={s.hero}>
       <div className={s.rays} />
 
-      <span className={`${s.deco} ${s.deco1}`}>🍸</span>
-      <span className={`${s.deco} ${s.deco2}`}>🥃</span>
-
       <div className={s.inner}>
         <p className={s.eyebrow}>
           Coming Soon &nbsp;·&nbsp; Est. 2025 &nbsp;·&nbsp; The Art of Fine Cocktails
