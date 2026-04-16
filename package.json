@@ -1,0 +1,9 @@
+{
+  "name": "the-distillist-monorepo",
+  "private": true,
+  "description": "Railway/Railpack entry only — use `cd frontend && npm run dev` for local frontend work",
+  "scripts": {
+    "build": "cd frontend && npm ci && npm run build",
+    "start": "cd frontend && npm run start"
+  }
+}
