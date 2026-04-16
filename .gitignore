@@ -3,6 +3,7 @@ frontend/node_modules/
 frontend/dist/
 frontend/.env
 frontend/.env.*
+!frontend/.env.example
 frontend/*.local
 
 # Legacy / accidental root installs
@@ -10,6 +11,7 @@ node_modules/
 dist/
 .env
 .env.*
+!frontend/.env.example
 *.local
 .DS_Store
 
