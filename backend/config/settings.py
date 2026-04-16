@@ -14,9 +14,10 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = ["*"]
 
+_csrf_defaults = "https://thedistillist.com,https://www.thedistillist.com,https://api.thedistillist.com"
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", _csrf_defaults).split(",")
     if origin.strip()
 ]
 
@@ -133,8 +134,9 @@ else:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+_cors_defaults = "http://localhost:3000,https://thedistillist.com,https://www.thedistillist.com"
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    for origin in os.environ.get("CORS_ALLOWED_ORIGINS", _cors_defaults).split(",")
     if origin.strip()
 ]
