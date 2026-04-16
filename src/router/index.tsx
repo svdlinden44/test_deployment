@@ -8,6 +8,7 @@ import { Bars } from '@/pages/Bars'
 import { Profile } from '@/pages/Profile'
 import { Login } from '@/pages/Login'
 import { Signup } from '@/pages/Signup'
+import { ComingSoon } from '@/pages/ComingSoon'
 
 function RootLayout() {
   return (
@@ -41,4 +42,5 @@ export const router = createBrowserRouter([
   },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <Signup /> },
+  { path: '/coming-soon', element: <ComingSoon /> },
 ])

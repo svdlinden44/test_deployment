@@ -7,7 +7,7 @@ export function Footer() {
       <div className={s.inner}>
         <div className={s.top}>
           <div>
-            <p className={s.logo}>🥃 The Distillist</p>
+            <img src="/images/logo-banner.png" alt="The Distillist" className={s.logo} />
             <p className={s.tagline}>Where Every Sip Has a Story</p>
           </div>
 

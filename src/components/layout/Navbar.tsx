@@ -11,8 +11,7 @@ export function Navbar() {
   return (
     <nav className={cn(s.nav, scrolled && s.scrolled)}>
       <Link to="/" className={s.logo}>
-        <span className={s.logoIcon}>🥃</span>
-        The Distillist
+        <img src="/images/logo-small.png" alt="The Distillist" className={s.logoImg} />
       </Link>
 
       <ul className={s.links}>

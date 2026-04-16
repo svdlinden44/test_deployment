@@ -9,4 +9,9 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  server: {
+    watch: {
+      ignored: ['**/backend/**'],
+    },
+  },
 })

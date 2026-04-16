@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "corsheaders",
+    "storages",
+    "imagekit",
     "cocktails",
 ]
 
@@ -86,11 +88,48 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+
+# ── Media / Cloudflare R2 ──
+R2_BUCKET = os.environ.get("R2_BUCKET_NAME", "")
+R2_ENDPOINT = os.environ.get("R2_ENDPOINT_URL", "")
+R2_ACCESS_KEY = os.environ.get("R2_ACCESS_KEY", "")
+R2_SECRET_KEY = os.environ.get("R2_SECRET_KEY", "")
+R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL", "")
+
+_use_r2 = all([R2_BUCKET, R2_ENDPOINT, R2_ACCESS_KEY, R2_SECRET_KEY])
+
+if _use_r2:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": R2_BUCKET,
+                "endpoint_url": R2_ENDPOINT,
+                "access_key": R2_ACCESS_KEY,
+                "secret_key": R2_SECRET_KEY,
+                "default_acl": "public-read",
+                "signature_version": "s3v4",
+                "object_parameters": {
+                    "CacheControl": "public, max-age=86400",
+                },
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"{R2_PUBLIC_URL}/" if R2_PUBLIC_URL else f"{R2_ENDPOINT}/{R2_BUCKET}/"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

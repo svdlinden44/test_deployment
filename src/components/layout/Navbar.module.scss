@@ -22,18 +22,19 @@
 }
 
 .logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-  letter-spacing: 0.06em;
-  color: var(--gold);
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
 }
 
-.logoIcon {
-  font-size: 1.5rem;
+.logoImg {
+  height: 42px;
+  width: auto;
+  transition: opacity 0.3s;
+
+  &:hover {
+    opacity: 0.85;
+  }
 }
 
 .links {

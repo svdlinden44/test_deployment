@@ -1,0 +1,199 @@
+.page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--black);
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(8, 5, 3, 0.45) 0%, rgba(8, 5, 3, 0.85) 100%),
+    linear-gradient(to bottom, rgba(8, 5, 3, 0.3) 0%, rgba(8, 5, 3, 0.6) 40%, rgba(8, 5, 3, 0.9) 100%);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+}
+
+.heroLogo {
+  width: clamp(180px, 28vw, 280px);
+  height: auto;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.9s 0.3s forwards;
+  filter: drop-shadow(0 4px 24px rgba(201, 168, 76, 0.15));
+}
+
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.6rem, 6.5vw, 5.5rem);
+  line-height: 1.08;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 1s 0.6s forwards;
+
+  em {
+    font-style: italic;
+    color: var(--gold);
+    display: block;
+  }
+}
+
+.goldLine {
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 0 auto 2rem;
+  opacity: 0;
+  animation: fadeIn 1s 1.2s forwards;
+}
+
+.quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  font-style: italic;
+  color: var(--cream-dim);
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: fadeUp 1s 0.9s forwards;
+}
+
+.features {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fadeIn 1s 1.5s forwards;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.featureIcon {
+  font-size: 1.4rem;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.featureText {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  font-weight: 400;
+}
+
+.divider {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--gold-dim), transparent);
+}
+
+.badge {
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeIn 1s 1.8s forwards;
+}
+
+.badgeLabel {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  padding: 0.6rem 2rem;
+  display: inline-block;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  &::before {
+    right: 100%;
+    margin-right: 12px;
+  }
+
+  &::after {
+    left: 100%;
+    margin-left: 12px;
+  }
+}
+
+.footnote {
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  animation: fadeIn 1s 2.1s forwards;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .features {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+  }
+
+  .badgeLabel {
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+}

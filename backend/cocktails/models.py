@@ -1,6 +1,10 @@
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill, ResizeToFit
 
 
 class Category(models.Model):
@@ -42,7 +46,13 @@ class Ingredient(models.Model):
         blank=True,
         help_text="Alcohol by volume (%)",
     )
-    image = models.URLField(blank=True)
+    image = models.ImageField(upload_to="ingredients/", blank=True)
+    image_card = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(400, 400)],
+        format="WEBP",
+        options={"quality": 80},
+    )
 
     class Meta:
         ordering = ["type", "name"]
@@ -77,7 +87,19 @@ class Recipe(models.Model):
     description = models.TextField(help_text="Short intro shown in cards and search results")
     instructions = models.TextField(help_text="Step-by-step preparation instructions")
     history = models.TextField(blank=True, help_text="Origin story behind the cocktail")
-    image = models.URLField(blank=True)
+    image = models.ImageField(upload_to="recipes/", blank=True)
+    image_card = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(400, 400)],
+        format="WEBP",
+        options={"quality": 80},
+    )
+    image_hero = ImageSpecField(
+        source="image",
+        processors=[ResizeToFit(1200, 800)],
+        format="WEBP",
+        options={"quality": 85},
+    )
 
     category = models.ForeignKey(
         Category,
@@ -109,6 +131,8 @@ class Recipe(models.Model):
     is_alcoholic = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False, help_text="Show on the homepage")
     is_published = models.BooleanField(default=True)
+
+    gallery = GenericRelation("Image", related_query_name="recipe")
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -214,9 +238,18 @@ class Bar(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     website = models.URLField(blank=True)
-    image = models.URLField(blank=True)
+    image = models.ImageField(upload_to="bars/", blank=True)
+    image_card = ImageSpecField(
+        source="image",
+        processors=[ResizeToFill(400, 400)],
+        format="WEBP",
+        options={"quality": 80},
+    )
     is_featured = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
+
+    gallery = GenericRelation("Image", related_query_name="bar")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -228,3 +261,39 @@ class Bar(models.Model):
         if self.city:
             parts.append(self.city)
         return " — ".join(parts)
+
+
+class Image(models.Model):
+    """Reusable image model -- attach to any model via GenericForeignKey."""
+
+    file = models.ImageField(upload_to="gallery/%Y/%m/")
+    file_card = ImageSpecField(
+        source="file",
+        processors=[ResizeToFill(400, 400)],
+        format="WEBP",
+        options={"quality": 80},
+    )
+    file_full = ImageSpecField(
+        source="file",
+        processors=[ResizeToFit(1600, 1200)],
+        format="WEBP",
+        options={"quality": 85},
+    )
+
+    caption = models.CharField(max_length=300, blank=True)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["sort_order", "-created_at"]
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+    def __str__(self):
+        return self.caption or f"Image #{self.pk}"

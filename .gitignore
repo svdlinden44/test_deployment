@@ -9,5 +9,6 @@ dist
 backend/.venv/
 backend/db.sqlite3
 backend/staticfiles/
+backend/media/
 __pycache__/
 *.pyc
