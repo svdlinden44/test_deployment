@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 interface ImportMetaEnv {
   /** When `true` or `1`, all routes send visitors to `/coming-soon` unless bypassed. */
