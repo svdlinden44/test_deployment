@@ -1,5 +1,13 @@
-node_modules
-dist
+# Frontend (Vite) — app lives in frontend/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+frontend/*.local
+
+# Legacy / accidental root installs
+node_modules/
+dist/
 .env
 .env.*
 *.local
