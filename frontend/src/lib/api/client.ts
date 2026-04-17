@@ -1,7 +1,19 @@
 import { useAuthStore } from '@/store/authStore'
 import { ApiError } from './types'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+
+function buildRequestUrl(path: string): string {
+  const p = path.startsWith('/') ? path : `/${path}`
+  if (!BASE_URL) {
+    return new URL(p, window.location.origin).toString()
+  }
+  if (BASE_URL.startsWith('http://') || BASE_URL.startsWith('https://')) {
+    return `${BASE_URL}${p}`
+  }
+  // e.g. api.example.com (no scheme) — treat as host
+  return `https://${BASE_URL.replace(/^\/*/, '')}${p}`
+}
 
 function parseApiErrorMessage(body: Record<string, unknown>, fallback: string): string {
   const d = body.detail
@@ -31,27 +43,39 @@ export async function request<T>(
 ): Promise<T> {
   const { params, auth = true, ...fetchInit } = init
 
-  const url = new URL(BASE_URL + path, window.location.origin)
+  const urlObj = new URL(buildRequestUrl(path))
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v === undefined) return
       if (Array.isArray(v)) {
         v.forEach((item) => {
           if (item === undefined || item === '') return
-          url.searchParams.append(k, String(item))
+          urlObj.searchParams.append(k, String(item))
         })
       } else {
-        url.searchParams.set(k, String(v))
+        urlObj.searchParams.set(k, String(v))
       }
     })
   }
+  const url = urlObj.toString()
 
   const token = useAuthStore.getState().token
   const headers = new Headers(fetchInit.headers)
   headers.set('Content-Type', 'application/json')
   if (auth && token) headers.set('Authorization', `Bearer ${token}`)
 
-  const res = await fetch(url.toString(), { ...fetchInit, headers })
+  let res: Response
+  try {
+    res = await fetch(url, { ...fetchInit, headers })
+  } catch (e) {
+    const msg =
+      e instanceof TypeError && e.message === 'Failed to fetch'
+        ? 'Could not reach the API. Check your connection, or try again in a moment.'
+        : e instanceof Error
+          ? e.message
+          : 'Network error'
+    throw new ApiError(0, 'NETWORK', msg)
+  }
 
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
