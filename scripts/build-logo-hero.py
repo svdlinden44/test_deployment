@@ -3,9 +3,10 @@
 Rebuild frontend/public/images/logo-hero.png from the high-res source in Downloads.
 
 1) Edge-connected flood fill: very dark pixels touching the image border → transparent.
-2) Interior cleanup: remaining opaque pixels that are still "neutral near-black"
-   (low max channel + low chroma) → transparent, so enclosed pockets between gold
-   borders and inside the flask can clear without nuking saturated gold/greens.
+2) Interior cleanup: remaining opaque pixels that are still "muted dark" (low max
+   channel + capped chroma) → transparent, including dark brown pockets between gold
+   borders / in the flask. Main emblem mid-tones stay brighter or more saturated
+   (chroma above the cap) so they are kept.
 
 Requires: pip install Pillow
 """
@@ -22,8 +23,11 @@ SRC = Path.home() / "Downloads" / "high res logo.png"
 DST = Path(__file__).resolve().parent.parent / "frontend" / "public" / "images" / "logo-hero.png"
 MAX_SIDE = 768
 RGB_EDGE_MAX = 58  # edge flood: max(R,G,B) <= this, connected to border
-RGB_INNER_MAX = 64  # second pass: remove enclosed dark neutrals
-CHROMA_INNER_MAX = 30  # max(R,G,B) - min(R,G,B) <= this → treat as neutral dark
+# Inner pass: remove enclosed dark browns / greys. Core emblem mid-tone (~97,72,54)
+# has chroma ~43 — keep CHROMA_INNER_MAX at 40 so that survives; allow higher max
+# to clear slightly brighter brown pockets.
+RGB_INNER_MAX = 105
+CHROMA_INNER_MAX = 40
 
 
 def rgb_max(r: int, g: int, b: int) -> int:
@@ -79,7 +83,7 @@ def edge_flood_transparent(rgb: Image.Image, edge_threshold: int) -> Image.Image
 
 
 def inner_dark_cleanup(im: Image.Image) -> Image.Image:
-    """Remove enclosed near-black neutral pixels (still opaque)."""
+    """Remove enclosed muted dark pixels (still opaque): near-black and dark brown."""
     w, h = im.size
     px = im.load()
     out = im.copy()
