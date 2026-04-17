@@ -4,6 +4,11 @@
   "description": "Railway/Railpack entry only — use `cd frontend && npm run dev` for local frontend work",
   "scripts": {
     "build": "cd frontend && npm ci && npm run build",
-    "start": "cd frontend && npm run start"
+    "start": "cd frontend && npm run start",
+    "dev:clean": "bash scripts/kill-dev-ports.sh && concurrently -k -n front,api -c cyan,magenta \"npm run dev --prefix frontend\" \"npm run dev:api\"",
+    "dev:api": "cd backend && (test -x .venv/bin/python && exec .venv/bin/python manage.py runserver || exec python3 manage.py runserver)"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
   }
 }
