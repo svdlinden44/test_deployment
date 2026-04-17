@@ -1,0 +1,42 @@
+.wrap {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.ring {
+  display: grid;
+  place-items: center;
+}
+
+.logo {
+  display: block;
+  width: 56px;
+  height: auto;
+  animation: logoPulse 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(201, 168, 76, 0.35));
+}
+
+@keyframes logoPulse {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(1) rotate(-4deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08) rotate(4deg);
+  }
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

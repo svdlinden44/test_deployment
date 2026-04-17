@@ -1,0 +1,196 @@
+/* The Distillist — admin skin (aligns with frontend :root palette) */
+/* Palette: --black #080503, --dark #0f0a06, --dark2 #18100a, --dark3 #221508,
+   --gold #c9a84c, --gold-lt #e2c97e, --gold-dim #8a6e30, --cream #f0e6d3 */
+
+html[data-theme="light"],
+html[data-theme="dark"],
+html[data-theme="auto"],
+:root {
+  /* Map Django admin variables to brand colors */
+  --primary: #c9a84c;
+  --secondary: #221508;
+  --accent: #e2c97e;
+  --primary-fg: #f0e6d3;
+
+  --body-fg: #f0e6d3;
+  --body-bg: #0f0a06;
+  --body-quiet-color: #c4b49a;
+  --body-medium-color: #e2c97e;
+  --body-loud-color: #ffffff;
+
+  --header-color: #f0e6d3;
+  --header-branding-color: #c9a84c;
+  --header-bg: #18100a;
+  --header-link-color: #e2c97e;
+
+  --breadcrumbs-fg: #c4b49a;
+  --breadcrumbs-link-fg: #f0e6d3;
+  --breadcrumbs-bg: #221508;
+
+  --link-fg: #c9a84c;
+  --link-hover-color: #e2c97e;
+  --link-selected-fg: #8a6e30;
+
+  --hairline-color: #2a2018;
+  --border-color: #3d3228;
+
+  --error-fg: #f87171;
+
+  --message-success-bg: #1a3320;
+  --message-warning-bg: #3d3010;
+  --message-error-bg: #3d1510;
+
+  --darkened-bg: #18100a;
+  --selected-bg: #221508;
+  --selected-row: #2a2312;
+
+  --button-fg: #0f0a06;
+  --button-bg: #c9a84c;
+  --button-hover-bg: #e2c97e;
+  --default-button-bg: #8a6e30;
+  --default-button-hover-bg: #c9a84c;
+  --close-button-bg: #3d3228;
+  --close-button-hover-bg: #554738;
+  --delete-button-bg: #8c2d1f;
+  --delete-button-hover-bg: #6f2419;
+
+  --object-tools-fg: #0f0a06;
+  --object-tools-bg: #c9a84c;
+  --object-tools-hover-bg: #e2c97e;
+
+  --font-family-primary:
+    "Raleway",
+    "Segoe UI",
+    system-ui,
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+body {
+  font-weight: 400;
+}
+
+/* Header & logo */
+#header {
+  border-bottom: 1px solid #3d3228;
+}
+
+.distillist-branding {
+  display: flex;
+  align-items: center;
+  min-height: 2rem;
+}
+
+.distillist-branding a {
+  display: flex;
+  align-items: center;
+}
+
+.distillist-admin-logo {
+  display: block;
+  max-height: 40px;
+  width: auto;
+  height: auto;
+}
+
+/* User tools — link + logout button */
+#user-tools a,
+#user-tools button {
+  color: var(--header-link-color) !important;
+}
+
+#user-tools button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+}
+
+#user-tools button:hover {
+  color: var(--accent) !important;
+}
+
+/* Main content panels */
+.module h2,
+.module caption,
+.inline-group h2 {
+  background: #18100a;
+  color: #f0e6d3;
+  border-bottom: 1px solid #3d3228;
+}
+
+fieldset.module {
+  background: #080503;
+  border: 1px solid #3d3228;
+}
+
+/* Tables */
+#result_list tbody tr:nth-child(odd) {
+  background: #0f0a06;
+}
+
+#result_list tbody tr:nth-child(even) {
+  background: #14100c;
+}
+
+thead th {
+  background: #18100a;
+  color: #f0e6d3;
+}
+
+/* Login body (centered card) */
+body.login {
+  background: #080503;
+}
+
+body.login #header {
+  justify-content: center;
+  text-align: center;
+}
+
+body.login #header #branding {
+  width: 100%;
+  justify-content: center;
+}
+
+body.login #content {
+  padding: 2rem 1.5rem;
+}
+
+body.login #content-main {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #18100a;
+  border: 1px solid #3d3228;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+body.login .submit-row input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* Sidebar (if enabled) */
+.module.filtered {
+  background: #080503;
+}
+
+.selector-available,
+.selector-chosen {
+  background: #18100a !important;
+}

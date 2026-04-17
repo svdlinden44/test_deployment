@@ -1,53 +1,47 @@
 import { request } from './client'
 import type {
-  Cocktail,
-  Bar,
+  CategoryDto,
+  IngredientMini,
+  PaginatedResults,
+  RecipeDetail,
+  RecipeFilters,
+  RecipeListItem,
   Bottle,
-  AuthUser,
-  PaginatedResponse,
-  CocktailFilters,
-  BarFilters,
 } from './types'
 
-export const joinWaitlist = (email: string) =>
-  request<{ message: string }>('/api/waitlist', {
-    method: 'POST',
-    body: JSON.stringify({ email }),
+function filtersToParams(f?: RecipeFilters): Record<string, string | number | string[] | undefined> {
+  if (!f) return {}
+  const { ingredient, page, per_page, ...rest } = f
+  return {
+    ...rest,
+    page: page ?? undefined,
+    per_page: per_page ?? undefined,
+    ingredient: ingredient?.length ? ingredient : undefined,
+  }
+}
+
+export const getRecipes = (filters?: RecipeFilters) =>
+  request<PaginatedResults<RecipeListItem>>('/api/recipes/', {
+    params: filtersToParams(filters),
+    auth: false,
   })
 
-export const getCocktails = (filters?: CocktailFilters) =>
-  request<PaginatedResponse<Cocktail>>('/api/cocktails', {
-    params: filters as Record<string, string> | undefined,
+export const getRecipeBySlug = (slug: string) =>
+  request<RecipeDetail>(`/api/recipes/${slug}/`, { auth: false })
+
+export const getCategories = () =>
+  request<CategoryDto[]>('/api/categories/', { auth: false })
+
+export const searchIngredients = (search: string, page = 1) =>
+  request<PaginatedResults<IngredientMini>>('/api/ingredients/', {
+    params: { search: search || undefined, page },
+    auth: false,
   })
 
-export const getCocktailById = (id: string) =>
-  request<Cocktail>(`/api/cocktails/${id}`)
-
-export const getBars = (filters?: BarFilters) =>
-  request<PaginatedResponse<Bar>>('/api/bars', {
-    params: filters as Record<string, string> | undefined,
-  })
-
-export const getBarById = (id: string) =>
-  request<Bar>(`/api/bars/${id}`)
-
-export const getCabinet = () =>
-  request<Bottle[]>('/api/me/cabinet')
+export const getCabinet = () => request<Bottle[]>('/api/me/cabinet')
 
 export const updateCabinet = (bottles: Bottle[]) =>
   request<Bottle[]>('/api/me/cabinet', {
     method: 'PUT',
     body: JSON.stringify(bottles),
-  })
-
-export const authLogin = (email: string, password: string) =>
-  request<{ user: AuthUser; token: string }>('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  })
-
-export const authSignup = (email: string, password: string, name: string) =>
-  request<{ user: AuthUser; token: string }>('/api/auth/signup', {
-    method: 'POST',
-    body: JSON.stringify({ email, password, name }),
   })

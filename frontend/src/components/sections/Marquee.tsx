@@ -3,7 +3,7 @@ import s from './Marquee.module.scss'
 const ITEMS = [
   'Thousands of Recipes',
   'Origin Stories',
-  'Bar Finder',
+  'Collections',
   'Personal Cabinet',
   'Smart Recommendations',
   'Custom Creations',

@@ -1,24 +1,13 @@
 .hero {
+  position: relative;
+  overflow: hidden;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 80%, rgba(122, 59, 16, 0.28) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 50% at 20% 20%, rgba(92, 26, 14, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 80% 10%, rgba(201, 168, 76, 0.06) 0%, transparent 55%),
-    var(--black);
+  background: var(--black);
   padding: 8rem 2rem 5rem;
-}
-
-.rays {
-  position: absolute;
-  inset: 0;
-  background:
-    conic-gradient(from 200deg at 50% 110%, transparent 20deg, rgba(201, 168, 76, 0.04) 25deg, transparent 30deg),
-    conic-gradient(from 160deg at 50% 110%, transparent 20deg, rgba(201, 168, 76, 0.03) 26deg, transparent 32deg);
-  animation: rays 8s ease-in-out infinite alternate;
 }
 
 .inner {
@@ -102,6 +91,7 @@
   position: absolute;
   bottom: 2.5rem;
   left: 50%;
+  z-index: 2;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -131,11 +121,6 @@
 
 @keyframes fadeIn {
   to { opacity: 1; }
-}
-
-@keyframes rays {
-  from { opacity: 0.5; transform: rotate(-2deg); }
-  to   { opacity: 1;   transform: rotate(2deg); }
 }
 
 @keyframes scrollPulse {

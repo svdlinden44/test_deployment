@@ -1,15 +1,18 @@
 import { Link } from 'react-router-dom'
+import { CinematicLoopVideo } from '@/components/video/CinematicLoopVideo'
 import { Button } from '@/components/ui/Button'
 import s from './Hero.module.scss'
+
+const HERO_VIDEO_SRC = '/video/hero-high-res-with-sound-v2.mp4'
 
 export function Hero() {
   return (
     <section id="hero" className={s.hero}>
-      <div className={s.rays} />
+      <CinematicLoopVideo src={HERO_VIDEO_SRC} />
 
       <div className={s.inner}>
         <p className={s.eyebrow}>
-          Coming Soon &nbsp;·&nbsp; Est. 2025 &nbsp;·&nbsp; The Art of Fine Cocktails
+          Est. 2025 &nbsp;·&nbsp; The Art of Fine Cocktails
         </p>
 
         <h1 className={s.title}>
@@ -25,17 +28,16 @@ export function Hero() {
         </p>
 
         <p className={s.desc}>
-          The Distillist is where cocktail culture comes alive. Thousands of curated recipes,
-          the origin stories behind every glass, the world's finest bars at your fingertips,
-          and a personal cabinet built around what you already love.
+          The Distillist is where cocktail culture comes alive: curated recipes, the stories
+          behind every glass, and a personal cabinet built around what you already love.
         </p>
 
         <div className={s.actions}>
-          <Link to="/#waitlist">
-            <Button variant="primary">Reserve Your Seat</Button>
+          <Link to="/signup">
+            <Button variant="primary">Sign up free</Button>
           </Link>
-          <Link to="/#features">
-            <Button variant="ghost">Explore the Vision</Button>
+          <Link to="/recipes">
+            <Button variant="ghost">Browse recipes</Button>
           </Link>
         </div>
       </div>

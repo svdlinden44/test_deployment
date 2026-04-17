@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import s from './Personalization.module.scss'
 
 const BOTTLES = [
-  { emoji: '🥃', label: 'Bourbon', active: true },
+  { emoji: '✦', label: 'Bourbon', active: true },
   { emoji: '🍸', label: 'Dry Gin', active: true },
   { emoji: '🌿', label: 'Campari', active: true },
   { emoji: '🍋', label: 'Limoncello', active: false },
@@ -61,8 +61,8 @@ export function Personalization() {
             ))}
           </ul>
 
-          <Link to="/#waitlist">
-            <Button variant="primary">Get Early Access</Button>
+          <Link to="/signup">
+            <Button variant="primary">Sign up free</Button>
           </Link>
         </div>
 

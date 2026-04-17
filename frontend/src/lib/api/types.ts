@@ -4,26 +4,66 @@ export interface AuthUser {
   name: string
 }
 
-export interface Cocktail {
-  id: string
-  name: string
-  origin: string
-  description: string
-  ingredients: string[]
-  instructions: string[]
-  emoji: string
-  era?: string
-  difficulty?: 'easy' | 'medium' | 'hard'
+/** DRF page-number pagination */
+export interface PaginatedResults<T> {
+  count: number
+  next: string | null
+  previous: string | null
+  results: T[]
 }
 
-export interface Bar {
-  id: string
+export interface CategoryDto {
+  slug: string
   name: string
-  city: string
-  country: string
+  sort_order: number
+  recipe_count?: number
+}
+
+export interface RecipeListItem {
+  id: number
+  slug: string
+  title: string
   description: string
-  type: 'speakeasy' | 'hotel' | 'neighborhood' | 'cocktail-bar'
-  emoji: string
+  category: CategoryDto | null
+  difficulty: string
+  glass_type: string
+  prep_time_minutes: number
+  is_alcoholic: boolean
+  image_url: string | null
+}
+
+export interface RecipeIngredientLine {
+  quantity: string
+  unit: string
+  notes: string
+  sort_order: number
+  ingredient_name: string
+  ingredient_slug: string
+}
+
+export interface RecipeDetail extends RecipeListItem {
+  instructions: string
+  history: string
+  ingredients: RecipeIngredientLine[]
+}
+
+export interface IngredientMini {
+  id: number
+  slug: string
+  name: string
+  type: string
+}
+
+export interface RecipeFilters {
+  search?: string
+  category?: string
+  difficulty?: string
+  glass?: string
+  alcoholic?: '' | '1' | '0'
+  ingredient?: string[]
+  ingredient_match?: 'any' | 'all'
+  page?: number
+  per_page?: number
 }
 
 export interface Bottle {
@@ -34,34 +74,11 @@ export interface Bottle {
   active: boolean
 }
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  perPage: number
-}
-
-export interface CocktailFilters {
-  spirit?: string
-  difficulty?: string
-  era?: string
-  search?: string
-  page?: string
-}
-
-export interface BarFilters {
-  city?: string
-  country?: string
-  type?: string
-  search?: string
-  page?: string
-}
-
 export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
-    message: string
+    message: string,
   ) {
     super(message)
     this.name = 'ApiError'

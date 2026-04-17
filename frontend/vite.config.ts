@@ -55,5 +55,11 @@ export default defineConfig({
     watch: {
       ignored: [resolve(__dirname, '../backend')],
     },
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+    },
   },
 })

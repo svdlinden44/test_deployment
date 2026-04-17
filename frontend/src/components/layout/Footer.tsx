@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import s from './Footer.module.scss'
 
 export function Footer() {
+  const { user } = useAuth()
+
   return (
     <footer className={s.footer}>
       <div className={s.inner}>
@@ -15,9 +18,13 @@ export function Footer() {
             <h4 className={s.linksHeading}>Explore</h4>
             <ul className={s.linksList}>
               <li><Link to="/#features" className={s.link}>Features</Link></li>
-              <li><Link to="/cocktails" className={s.link}>Recipe Vault</Link></li>
-              <li><Link to="/profile" className={s.link}>Your Bar</Link></li>
-              <li><Link to="/#waitlist" className={s.link}>Early Access</Link></li>
+              {user ? (
+                <>
+                  <li><Link to="/recipes" className={s.link}>Recipe Vault</Link></li>
+                  <li><Link to="/profile" className={s.link}>Your Bar</Link></li>
+                </>
+              ) : null}
+              <li><Link to="/signup" className={s.link}>Sign up</Link></li>
             </ul>
           </div>
 

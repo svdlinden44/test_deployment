@@ -1,10 +1,19 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.utils.html import format_html
 
-from .models import Bar, Category, Comment, Image, Ingredient, Rating, Recipe, RecipeIngredient
+from .models import (
+    Bar,
+    Category,
+    Comment,
+    Image,
+    Ingredient,
+    IngredientExternalRef,
+    Rating,
+    Recipe,
+    RecipeExternalRef,
+    RecipeIngredient,
+)
 
 
 def _thumb(obj, field="image", size=60):
@@ -21,6 +30,20 @@ class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 3
     autocomplete_fields = ["ingredient"]
+
+
+class RecipeExternalRefInline(admin.TabularInline):
+    model = RecipeExternalRef
+    extra = 0
+    readonly_fields = ["source_key", "external_id", "metadata", "created_at", "updated_at"]
+    can_delete = False
+
+
+class IngredientExternalRefInline(admin.TabularInline):
+    model = IngredientExternalRef
+    extra = 0
+    readonly_fields = ["source_key", "external_id", "metadata", "created_at", "updated_at"]
+    can_delete = False
 
 
 class RatingInline(admin.TabularInline):
@@ -71,6 +94,7 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ["name"]
     prepopulated_fields = {"slug": ("name",)}
     ordering = ["type", "name"]
+    inlines = [IngredientExternalRefInline]
 
     @admin.display(description="Image")
     def thumb(self, obj):
@@ -96,7 +120,7 @@ class RecipeAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     autocomplete_fields = ["category", "created_by"]
     readonly_fields = ["created_at", "updated_at", "image_preview"]
-    inlines = [RecipeIngredientInline, GalleryInline, RatingInline, CommentInline]
+    inlines = [RecipeExternalRefInline, RecipeIngredientInline, GalleryInline, RatingInline, CommentInline]
 
     fieldsets = [
         (None, {"fields": ["title", "slug", "description", "instructions", "history"]}),
@@ -192,9 +216,3 @@ class ImageAdmin(admin.ModelAdmin):
         return _thumb(obj, field="file", size=300)
 
 
-# Extend the built-in User admin to support autocomplete
-admin.site.unregister(User)
-
-@admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    search_fields = ["username", "email", "first_name", "last_name"]

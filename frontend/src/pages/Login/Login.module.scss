@@ -14,17 +14,41 @@
   max-width: 420px;
 }
 
-.logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-  letter-spacing: 0.06em;
-  color: var(--gold);
+.brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.25rem;
   text-decoration: none;
+}
+
+.brandImg {
+  width: clamp(170px, 48vw, 260px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 22px rgba(201, 168, 76, 0.14));
+}
+
+.googleSlot {
+  margin-bottom: 1.25rem;
+}
+
+.divider {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 3rem;
-  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(201, 168, 76, 0.15);
+  }
 }
 
 .card {

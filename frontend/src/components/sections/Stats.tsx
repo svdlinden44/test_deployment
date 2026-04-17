@@ -6,7 +6,7 @@ import s from './Stats.module.scss'
 const STATS = [
   { target: 3000, label: 'Curated Recipes', delay: '' },
   { target: 180, label: 'Countries Covered', delay: s.delayTwo },
-  { target: 500, label: 'Iconic Bar Profiles', delay: s.delayThree },
+  { target: 500, label: 'Saved collections', delay: s.delayThree },
   { target: 250, label: 'Years of History', delay: s.delayFour },
 ]
 

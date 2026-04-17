@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_("The Distillist") }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{# Load skin after Django admin css (including responsive.css) so variables always win #}
+{% block responsive %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/distillist_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name" class="distillist-branding">
+  <a href="{% url 'admin:index' %}">
+    <img
+      class="distillist-admin-logo"
+      src="{% static 'admin/logo-banner.png' %}"
+      alt="{% translate 'The Distillist administration' %}"
+      width="220"
+      decoding="async"
+    />
+  </a>
+</div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

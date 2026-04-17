@@ -1,11 +1,16 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { apiGoogleAuth, apiLogin, apiRegister, apiRefreshToken } from '@/lib/api/auth'
+import { ApiError } from '@/lib/api/types'
 import { useAuthStore, type AuthUser } from '@/store/authStore'
+
+export type GoogleAuthPayload = { credential: string } | { access_token: string }
 
 interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   signup: (email: string, password: string, name: string) => Promise<void>
+  loginWithGoogle: (payload: GoogleAuthPayload) => Promise<void>
   logout: () => void
 }
 
@@ -13,53 +18,97 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 const STORAGE_KEY = 'distillist_auth'
 
+type StoredAuth = {
+  user: AuthUser
+  access: string
+  refresh: string
+}
+
+/** Legacy shape before JWT refresh */
+type LegacyStoredAuth = {
+  user: AuthUser
+  token: string
+}
+
+function isStoredAuth(v: unknown): v is StoredAuth {
+  if (!v || typeof v !== 'object') return false
+  const o = v as Record<string, unknown>
+  const u = o.user
+  return (
+    typeof o.access === 'string' &&
+    typeof o.refresh === 'string' &&
+    !!u &&
+    typeof u === 'object'
+  )
+}
+
+function isLegacyStoredAuth(v: unknown): v is LegacyStoredAuth {
+  if (!v || typeof v !== 'object') return false
+  const o = v as Record<string, unknown>
+  const u = o.user
+  return typeof o.token === 'string' && !!u && typeof u === 'object'
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
-  const { setAuth, clearAuth } = useAuthStore()
+  const { setAuth, clearAuth, setAccessToken } = useAuthStore()
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const { user: storedUser, token } = JSON.parse(stored) as { user: AuthUser; token: string }
-        setUser(storedUser)
-        setAuth(storedUser, token)
+    const hydrate = async () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY)
+        if (!raw) return
+        const parsed = JSON.parse(raw) as unknown
+
+        if (isStoredAuth(parsed)) {
+          setUser(parsed.user)
+          setAuth(parsed.user, parsed.access, parsed.refresh)
+          try {
+            const { access } = await apiRefreshToken(parsed.refresh)
+            setAccessToken(access)
+            const next: StoredAuth = { ...parsed, access }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+          } catch {
+            /* keep existing access until first 401 */
+          }
+          return
+        }
+
+        if (isLegacyStoredAuth(parsed)) {
+          localStorage.removeItem(STORAGE_KEY)
+          return
+        }
+        localStorage.removeItem(STORAGE_KEY)
+      } catch {
+        localStorage.removeItem(STORAGE_KEY)
+      } finally {
+        setLoading(false)
       }
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
-    } finally {
-      setLoading(false)
     }
-  }, [setAuth])
+    void hydrate()
+  }, [setAuth, setAccessToken])
 
-  function persist(user: AuthUser, token: string) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }))
-    setUser(user)
-    setAuth(user, token)
+  function persist(next: StoredAuth) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    setUser(next.user)
+    setAuth(next.user, next.access, next.refresh)
   }
 
-  async function login(email: string, _password: string) {
-    await new Promise((r) => setTimeout(r, 600))
-    const fakeUser: AuthUser = {
-      id: crypto.randomUUID(),
-      email,
-      name: email.split('@')[0],
-    }
-    const fakeToken = btoa(JSON.stringify({ ...fakeUser, exp: Date.now() + 86400000 }))
-    persist(fakeUser, fakeToken)
-  }
+  const login = useCallback(async (email: string, password: string) => {
+    const { user: u, access, refresh } = await apiLogin(email, password)
+    persist({ user: u, access, refresh })
+  }, [])
 
-  async function signup(email: string, _password: string, name: string) {
-    await new Promise((r) => setTimeout(r, 600))
-    const fakeUser: AuthUser = {
-      id: crypto.randomUUID(),
-      email,
-      name,
-    }
-    const fakeToken = btoa(JSON.stringify({ ...fakeUser, exp: Date.now() + 86400000 }))
-    persist(fakeUser, fakeToken)
-  }
+  const signup = useCallback(async (email: string, password: string, name: string) => {
+    const { user: u, access, refresh } = await apiRegister(email, password, name)
+    persist({ user: u, access, refresh })
+  }, [])
+
+  const loginWithGoogle = useCallback(async (payload: GoogleAuthPayload) => {
+    const { user: u, access, refresh } = await apiGoogleAuth(payload)
+    persist({ user: u, access, refresh })
+  }, [])
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY)
@@ -68,7 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, loginWithGoogle, logout }}
+    >
       {children}
     </AuthContext.Provider>
   )
@@ -78,4 +129,10 @@ export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
+}
+
+export function getAuthErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) return err.message
+  if (err instanceof Error) return err.message
+  return 'Something went wrong. Please try again.'
 }

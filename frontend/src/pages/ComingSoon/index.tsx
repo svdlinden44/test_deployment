@@ -1,20 +1,12 @@
+import { CinematicLoopVideo } from '@/components/video/CinematicLoopVideo'
 import s from './ComingSoon.module.scss'
+
+const VIDEO_SRC = '/video/cocktail-wide-shot.mp4'
 
 export function ComingSoon() {
   return (
     <div className={s.page}>
-      <video
-        className={s.video}
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster=""
-      >
-        <source src="/video/cocktail-wide-shot.mp4" type="video/mp4" />
-      </video>
-
-      <div className={s.overlay} />
+      <CinematicLoopVideo src={VIDEO_SRC} />
 
       <div className={s.content}>
         <img

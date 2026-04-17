@@ -1,9 +1,17 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(BASE_DIR / ".env")
+except ImportError:
+    pass
 
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
@@ -32,6 +40,9 @@ INSTALLED_APPS = [
     "corsheaders",
     "storages",
     "imagekit",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "accounts",
     "cocktails",
 ]
 
@@ -52,7 +63,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -89,6 +100,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # ── Media / Cloudflare R2 ──
 R2_BUCKET = os.environ.get("R2_BUCKET_NAME", "")
@@ -98,6 +110,12 @@ R2_SECRET_KEY = os.environ.get("R2_SECRET_KEY", "")
 R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL", "")
 
 _use_r2 = all([R2_BUCKET, R2_ENDPOINT, R2_ACCESS_KEY, R2_SECRET_KEY])
+
+_staticfiles_backend = (
+    "whitenoise.storage.CompressedStaticFilesStorage"
+    if DEBUG
+    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
 
 if _use_r2:
     STORAGES = {
@@ -116,7 +134,7 @@ if _use_r2:
             },
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": _staticfiles_backend,
         },
     }
     MEDIA_URL = f"{R2_PUBLIC_URL}/" if R2_PUBLIC_URL else f"{R2_ENDPOINT}/{R2_BUCKET}/"
@@ -126,17 +144,42 @@ else:
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": _staticfiles_backend,
         },
     }
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
+# Dev: serve static from finders without requiring collectstatic (production still uses release build).
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_AUTOREFRESH = DEBUG
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-_cors_defaults = "http://localhost:3000,https://thedistillist.com,https://www.thedistillist.com"
+AUTH_USER_MODEL = "accounts.User"
+
+_cors_defaults = (
+    "http://localhost:3000,http://127.0.0.1:3000,"
+    "http://localhost:5173,http://127.0.0.1:5173,"
+    "https://thedistillist.com,https://www.thedistillist.com"
+)
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get("CORS_ALLOWED_ORIGINS", _cors_defaults).split(",")
     if origin.strip()
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
+    "ROTATE_REFRESH_TOKENS": False,
+}
+
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()

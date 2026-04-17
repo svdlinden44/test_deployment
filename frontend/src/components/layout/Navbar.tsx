@@ -11,7 +11,11 @@ export function Navbar() {
   return (
     <nav className={cn(s.nav, scrolled && s.scrolled)}>
       <Link to="/" className={s.logo}>
-        <img src="/images/logo-small.png" alt="The Distillist" className={s.logoImg} />
+        <img
+          src="/images/logo-banner.png"
+          alt="The Distillist"
+          className={s.logoImg}
+        />
       </Link>
 
       <ul className={s.links}>
@@ -22,30 +26,32 @@ export function Navbar() {
         </li>
         <li>
           <NavLink
-            to="/cocktails"
+            to="/recipes"
             className={({ isActive }) => cn(s.link, isActive && s.linkActive)}
           >
             Recipes
           </NavLink>
         </li>
-        <li>
-          <NavLink
-            to="/profile"
-            className={({ isActive }) => cn(s.link, isActive && s.linkActive)}
-          >
-            Your Bar
-          </NavLink>
-        </li>
         {user ? (
-          <li>
-            <button onClick={logout} className={s.cta}>
-              Sign Out
-            </button>
-          </li>
+          <>
+            <li>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) => cn(s.link, isActive && s.linkActive)}
+              >
+                Your Bar
+              </NavLink>
+            </li>
+            <li>
+              <button type="button" onClick={logout} className={s.cta}>
+                Sign Out
+              </button>
+            </li>
+          </>
         ) : (
           <li>
-            <NavLink to="/#waitlist" className={s.cta}>
-              Early Access
+            <NavLink to="/login" className={s.cta}>
+              Log in
             </NavLink>
           </li>
         )}

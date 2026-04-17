@@ -10,7 +10,7 @@ export interface Bottle {
 }
 
 const DEFAULT_BOTTLES: Bottle[] = [
-  { id: 'bourbon', name: 'Bourbon', category: 'Whiskey', emoji: '🥃', active: true },
+  { id: 'bourbon', name: 'Bourbon', category: 'Whiskey', emoji: '✦', active: true },
   { id: 'dry-gin', name: 'Dry Gin', category: 'Gin', emoji: '🍸', active: true },
   { id: 'campari', name: 'Campari', category: 'Liqueur', emoji: '🌿', active: true },
   { id: 'limoncello', name: 'Limoncello', category: 'Liqueur', emoji: '🍋', active: false },

@@ -1,18 +1,36 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { getAuthErrorMessage, useAuth } from '@/contexts/AuthContext'
 import s from './Login.module.scss'
 
 export function Login() {
-  const { login } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: Location })?.from?.pathname ?? '/'
+  const from =
+    (location.state as { from?: Pick<Location, 'pathname'> })?.from?.pathname ?? '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const handleGoogle = useCallback(
+    async (payload: { access_token: string } | { credential: string }) => {
+      setError('')
+      setLoading(true)
+      try {
+        await loginWithGoogle(payload)
+        navigate(from, { replace: true })
+      } catch (err) {
+        setError(getAuthErrorMessage(err))
+      } finally {
+        setLoading(false)
+      }
+    },
+    [from, loginWithGoogle, navigate],
+  )
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -21,8 +39,8 @@ export function Login() {
     try {
       await login(email, password)
       navigate(from, { replace: true })
-    } catch {
-      setError('Invalid credentials. Please try again.')
+    } catch (err) {
+      setError(getAuthErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -31,8 +49,12 @@ export function Login() {
   return (
     <div className={s.page}>
       <div className={s.wrapper}>
-        <Link to="/" className={s.logo}>
-          <span>🥃</span> The Distillist
+        <Link to="/" className={s.brand}>
+          <img
+            src="/images/logo-hero.png"
+            alt="The Distillist"
+            className={s.brandImg}
+          />
         </Link>
 
         <div className={s.card}>
@@ -40,6 +62,14 @@ export function Login() {
           <p className={s.sub}>Sign in to your account</p>
 
           {error && <p className={s.error}>{error}</p>}
+
+          <div className={s.googleSlot}>
+            <GoogleSignInButton mode="signin" onSuccess={handleGoogle} disabled={loading} />
+          </div>
+
+          <div className={s.divider}>
+            <span>or sign in with email</span>
+          </div>
 
           <form onSubmit={handleSubmit} className={s.form}>
             <div>
@@ -62,6 +92,7 @@ export function Login() {
                 required
                 placeholder="••••••••"
                 className={s.input}
+                autoComplete="current-password"
               />
             </div>
 
@@ -72,7 +103,9 @@ export function Login() {
 
           <p className={s.footer}>
             No account?{' '}
-            <Link to="/signup" className={s.footerLink}>Create one</Link>
+            <Link to="/signup" className={s.footerLink}>
+              Create one
+            </Link>
           </p>
         </div>
       </div>

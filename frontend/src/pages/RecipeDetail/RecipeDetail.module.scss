@@ -1,0 +1,120 @@
+@use '../../styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--dark);
+  padding: 7rem 1.25rem 4rem;
+  color: var(--cream);
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: rgba(201, 168, 76, 0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    color: var(--cream);
+  }
+}
+
+.muted {
+  color: var(--cream-dim);
+}
+
+.err {
+  color: #f4b4a8;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.heroImg {
+  margin: 0 auto 1.5rem;
+  max-width: 560px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 168, 76, 0.15);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    vertical-align: middle;
+  }
+}
+
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  margin: 0 0 1rem;
+  line-height: 1.15;
+}
+
+.lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--cream-dim);
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem 1.25rem;
+  list-style: none;
+  padding: 1.25rem 0 0;
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(201, 168, 76, 0.75);
+}
+
+.section {
+  margin-bottom: 2.25rem;
+  text-align: left;
+}
+
+.h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  margin: 0 0 1rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+  padding-bottom: 0.45rem;
+}
+
+.ingList {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--cream-dim);
+  line-height: 1.55;
+
+  li {
+    margin-bottom: 0.35rem;
+  }
+}
+
+.prose {
+  color: var(--cream-dim);
+  line-height: 1.65;
+  font-size: 1.02rem;
+
+  p {
+    margin: 0 0 0.85rem;
+  }
+}

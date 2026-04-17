@@ -263,6 +263,68 @@ class Bar(models.Model):
         return " — ".join(parts)
 
 
+class RecipeExternalRef(models.Model):
+    """
+    Links a Recipe to an identifier in an external catalog without baking any one
+    provider into the Recipe schema. Use `metadata` for provider-specific payloads.
+    """
+
+    recipe = models.ForeignKey(
+        "Recipe",
+        on_delete=models.CASCADE,
+        related_name="external_refs",
+    )
+    source_key = models.CharField(
+        max_length=64,
+        db_index=True,
+        help_text="Stable key for the importer (e.g. thecocktaildb).",
+    )
+    external_id = models.CharField(
+        max_length=128,
+        help_text="Primary id in the external catalog.",
+    )
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_key", "external_id"],
+                name="cocktails_recipeexternalref_source_id_uniq",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.source_key}:{self.external_id} → {self.recipe_id}"
+
+
+class IngredientExternalRef(models.Model):
+    """Same pattern as RecipeExternalRef, for ingredient-level catalog ids."""
+
+    ingredient = models.ForeignKey(
+        "Ingredient",
+        on_delete=models.CASCADE,
+        related_name="external_refs",
+    )
+    source_key = models.CharField(max_length=64, db_index=True)
+    external_id = models.CharField(max_length=128)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_key", "external_id"],
+                name="cocktails_ingredientexternalref_source_id_uniq",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.source_key}:{self.external_id} → {self.ingredient_id}"
+
+
 class Image(models.Model):
     """Reusable image model -- attach to any model via GenericForeignKey."""
 

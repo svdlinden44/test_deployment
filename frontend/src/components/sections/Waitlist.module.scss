@@ -43,7 +43,15 @@
   font-size: 1.15rem;
   font-style: italic;
   color: var(--cream-dim);
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .form {

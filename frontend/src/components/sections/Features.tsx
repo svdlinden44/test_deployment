@@ -20,9 +20,9 @@ const FEATURES = [
   },
   {
     num: '03',
-    icon: '🏛️',
-    title: 'Bar Finder',
-    desc: 'The finest cocktail bars on the planet, hand-curated by our editors. Hidden speakeasies, legendary hotel bars, and neighbourhood gems — always with you wherever you travel.',
+    icon: '🧭',
+    title: 'Collections & moods',
+    desc: 'Group recipes by spirit, occasion, or flavour profile. Save sets you love and return when the moment calls for something shaken, stirred, or straight up.',
     slide: null,
     delay: s.delayThree,
   },
@@ -59,7 +59,6 @@ function FeatureCard({ feature }: { feature: typeof FEATURES[number] }) {
       <span className={s.icon}>{feature.icon}</span>
       <h3 className={s.cardTitle}>{feature.title}</h3>
       <p className={s.cardDesc}>{feature.desc}</p>
-      <span className={s.tag}>Coming Soon</span>
     </div>
   )
 }
