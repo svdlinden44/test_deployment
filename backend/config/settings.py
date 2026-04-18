@@ -183,3 +183,10 @@ SIMPLE_JWT = {
 }
 
 GOOGLE_OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+
+# Sign in with Apple — Services ID (same as frontend VITE_APPLE_CLIENT_ID).
+APPLE_CLIENT_ID = os.environ.get("APPLE_CLIENT_ID", "").strip()
+
+# Facebook Login — app credentials for Graph API token checks (same app as frontend).
+FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "").strip()
+FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "").strip()

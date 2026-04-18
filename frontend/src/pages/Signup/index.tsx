@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { AppleSignInButton } from '@/components/auth/AppleSignInButton'
+import { FacebookSignInButton } from '@/components/auth/FacebookSignInButton'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { getAuthErrorMessage, useAuth } from '@/contexts/AuthContext'
 import s from './Signup.module.scss'
 
 export function Signup() {
-  const { signup, loginWithGoogle } = useAuth()
+  const { signup, loginWithGoogle, loginWithApple, loginWithFacebook } = useAuth()
   const navigate = useNavigate()
 
   const [name, setName] = useState('')
@@ -29,6 +31,38 @@ export function Signup() {
       }
     },
     [loginWithGoogle, navigate],
+  )
+
+  const handleApple = useCallback(
+    async (payload: { id_token: string }) => {
+      setError('')
+      setLoading(true)
+      try {
+        await loginWithApple(payload)
+        navigate('/profile', { replace: true })
+      } catch (err) {
+        setError(getAuthErrorMessage(err))
+      } finally {
+        setLoading(false)
+      }
+    },
+    [loginWithApple, navigate],
+  )
+
+  const handleFacebook = useCallback(
+    async (payload: { access_token: string }) => {
+      setError('')
+      setLoading(true)
+      try {
+        await loginWithFacebook(payload)
+        navigate('/profile', { replace: true })
+      } catch (err) {
+        setError(getAuthErrorMessage(err))
+      } finally {
+        setLoading(false)
+      }
+    },
+    [loginWithFacebook, navigate],
   )
 
   async function handleSubmit(e: React.FormEvent) {
@@ -68,6 +102,8 @@ export function Signup() {
 
           <div className={s.googleSlot}>
             <GoogleSignInButton mode="signup" onSuccess={handleGoogle} disabled={loading} />
+            <AppleSignInButton mode="signup" onSuccess={handleApple} disabled={loading} />
+            <FacebookSignInButton mode="signup" onSuccess={handleFacebook} disabled={loading} />
           </div>
 
           <div className={s.divider}>

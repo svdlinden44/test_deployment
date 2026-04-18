@@ -10,4 +10,10 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_URL?: string
   /** Google OAuth Web client ID for Sign in with Google (GIS). */
   readonly VITE_GOOGLE_CLIENT_ID?: string
+  /** Sign in with Apple — Services ID (same as backend APPLE_CLIENT_ID). */
+  readonly VITE_APPLE_CLIENT_ID?: string
+  /** Return URL registered in Apple Developer (defaults to current origin + path). */
+  readonly VITE_APPLE_REDIRECT_URI?: string
+  /** Facebook Login — Meta app ID (same app as backend FACEBOOK_APP_ID). */
+  readonly VITE_FACEBOOK_APP_ID?: string
 }

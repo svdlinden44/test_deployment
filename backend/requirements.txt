@@ -3,6 +3,7 @@ django>=5.1,<5.2
 djangorestframework>=3.15
 djangorestframework-simplejwt>=5.4
 google-auth>=2.36
+PyJWT[crypto]>=2.9
 requests>=2.32
 gunicorn>=23.0
 psycopg[binary]>=3.2

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { GoogleGMark } from './GoogleGMark'
-import s from './GoogleSignInButton.module.scss'
+import s from './SocialOAuthButton.module.scss'
 
 type TokenResponse = {
   access_token?: string
@@ -174,7 +174,7 @@ export function GoogleSignInButton({ onSuccess, disabled, mode }: Props) {
     <div className={s.wrap}>
       <button
         type="button"
-        className={s.googleBtn}
+        className={s.oauthBtn}
         onClick={handleClick}
         disabled={btnDisabled}
         aria-busy={!!clientId && !gsiReady}

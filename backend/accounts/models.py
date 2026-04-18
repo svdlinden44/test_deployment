@@ -9,6 +9,22 @@ class User(AbstractUser):
     """
 
     email = models.EmailField("email address", unique=True)
+    apple_sub = models.CharField(
+        "Apple ID subject",
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+    )
+    facebook_sub = models.CharField(
+        "Facebook user ID",
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+    )
 
     class Meta:
         db_table = "accounts_user"

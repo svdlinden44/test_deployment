@@ -59,3 +59,11 @@ class GoogleAuthSerializer(serializers.Serializer):
         attrs["credential"] = cred or None
         attrs["access_token"] = at or None
         return attrs
+
+
+class AppleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField()
+
+
+class FacebookAuthSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
