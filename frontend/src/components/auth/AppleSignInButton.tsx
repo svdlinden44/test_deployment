@@ -147,7 +147,6 @@ export function AppleSignInButton({ onSuccess, disabled, mode }: Props) {
     const script = document.createElement('script')
     script.src = APPLE_SCRIPT
     script.async = true
-    script.crossOrigin = 'anonymous'
     script.onload = () => init()
     script.onerror = () => {
       script.dataset.appleError = '1'

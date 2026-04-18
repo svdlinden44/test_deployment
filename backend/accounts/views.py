@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from jwt.exceptions import InvalidTokenError
+import jwt
 
 from .oauth_verification import (
     facebook_debug_token,
@@ -248,7 +248,7 @@ class AppleAuthView(APIView):
 
         try:
             decoded = verify_apple_id_token(raw, client_id)
-        except InvalidTokenError:
+        except jwt.PyJWTError:
             return Response(
                 {"detail": "Invalid Apple credential."},
                 status=status.HTTP_401_UNAUTHORIZED,

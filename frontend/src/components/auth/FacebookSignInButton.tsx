@@ -118,7 +118,6 @@ export function FacebookSignInButton({ onSuccess, disabled, mode }: Props) {
     script.id = 'facebook-jssdk'
     script.async = true
     script.defer = true
-    script.crossOrigin = 'anonymous'
     script.src = 'https://connect.facebook.net/en_US/sdk.js'
     script.onload = () => {
       /* fbAsyncInit runs when SDK is ready */
