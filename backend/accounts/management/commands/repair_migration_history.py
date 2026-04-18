@@ -1,8 +1,9 @@
 """
-Fix InconsistentMigrationHistory when django_migrations lists admin before accounts.
+Fix InconsistentMigrationHistory when apps that depend on accounts.User were
+recorded before accounts.0001_initial (e.g. admin or cocktails).
 
-Deploying with AUTH_USER_MODEL = accounts.User requires accounts.0001_initial to be
-applied before django.contrib.admin. Old or restored DBs sometimes only record admin.
+Deploying with AUTH_USER_MODEL = accounts.User requires accounts.0001_initial first.
+Old or restored DBs can list admin/cocktails as applied without accounts.
 
 Safe to run on every boot: no-ops when history is already consistent.
 """
@@ -30,10 +31,8 @@ def _accounts_initial_applied() -> bool:
     return ("accounts", "0001_initial") in applied
 
 
-def _admin_migration_rows_exist() -> bool:
-    recorder = MigrationRecorder(connection)
-    applied = recorder.applied_migrations()
-    return any(app == "admin" for app, _ in applied)
+# Apps whose initial migrations depend on AUTH_USER_MODEL in this project.
+_STRIP_BEFORE_ACCOUNTS_INITIAL = ("admin", "cocktails")
 
 
 class Command(BaseCommand):
@@ -69,17 +68,23 @@ class Command(BaseCommand):
             )
             return
 
-        # Targeted fix: admin recorded without accounts initial — remove admin rows so
-        # migrate can apply the graph in dependency order.
-        if not _accounts_initial_applied() and _admin_migration_rows_exist():
+        # Recorded apps that depend on accounts.User before accounts.0001 — strip those
+        # rows so migrate can replay in dependency order.
+        if not _accounts_initial_applied():
+            placeholders = ",".join(["%s"] * len(_STRIP_BEFORE_ACCOUNTS_INITIAL))
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM django_migrations WHERE app = %s", ["admin"])
-                deleted = cursor.rowcount if cursor.rowcount is not None else 0
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Removed {deleted} django.contrib.admin migration row(s) from django_migrations."
+                cursor.execute(
+                    f"DELETE FROM django_migrations WHERE app IN ({placeholders})",
+                    list(_STRIP_BEFORE_ACCOUNTS_INITIAL),
                 )
-            )
+                deleted = cursor.rowcount if cursor.rowcount is not None else 0
+            if deleted:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Removed {deleted} migration row(s) for apps "
+                        f"{', '.join(_STRIP_BEFORE_ACCOUNTS_INITIAL)} from django_migrations."
+                    )
+                )
 
         try:
             call_command(
