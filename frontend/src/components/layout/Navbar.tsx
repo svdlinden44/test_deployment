@@ -49,11 +49,18 @@ export function Navbar() {
             </li>
           </>
         ) : (
-          <li>
-            <NavLink to="/login" className={s.cta}>
-              Log in
-            </NavLink>
-          </li>
+          <>
+            <li>
+              <NavLink to="/signup" className={s.link}>
+                Join
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/login" className={s.cta}>
+                Log in
+              </NavLink>
+            </li>
+          </>
         )}
       </ul>
     </nav>

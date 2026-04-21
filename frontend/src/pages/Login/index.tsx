@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { AppleSignInButton } from '@/components/auth/AppleSignInButton'
 import { FacebookSignInButton } from '@/components/auth/FacebookSignInButton'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { getAuthErrorMessage, useAuth } from '@/contexts/AuthContext'
 import s from './Login.module.scss'
 
 export function Login() {
-  const { login, loginWithGoogle, loginWithApple, loginWithFacebook } = useAuth()
+  const { login, loginWithGoogle, loginWithFacebook } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from =
@@ -32,22 +31,6 @@ export function Login() {
       }
     },
     [from, loginWithGoogle, navigate],
-  )
-
-  const handleApple = useCallback(
-    async (payload: { id_token: string }) => {
-      setError('')
-      setLoading(true)
-      try {
-        await loginWithApple(payload)
-        navigate(from, { replace: true })
-      } catch (err) {
-        setError(getAuthErrorMessage(err))
-      } finally {
-        setLoading(false)
-      }
-    },
-    [from, loginWithApple, navigate],
   )
 
   const handleFacebook = useCallback(
@@ -99,7 +82,6 @@ export function Login() {
 
           <div className={s.googleSlot}>
             <GoogleSignInButton mode="signin" onSuccess={handleGoogle} disabled={loading} />
-            <AppleSignInButton mode="signin" onSuccess={handleApple} disabled={loading} />
             <FacebookSignInButton mode="signin" onSuccess={handleFacebook} disabled={loading} />
           </div>
 

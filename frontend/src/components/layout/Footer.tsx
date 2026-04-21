@@ -24,7 +24,13 @@ export function Footer() {
                   <li><Link to="/profile" className={s.link}>Your Bar</Link></li>
                 </>
               ) : null}
-              <li><Link to="/signup" className={s.link}>Sign up</Link></li>
+              {!user ? (
+                <li>
+                  <Link to="/signup" className={s.link}>
+                    Sign up
+                  </Link>
+                </li>
+              ) : null}
             </ul>
           </div>
 

@@ -37,14 +37,6 @@ export async function apiGoogleAuth(
   })
 }
 
-export async function apiAppleAuth(payload: { id_token: string }): Promise<AuthTokensResponse> {
-  return request<AuthTokensResponse>('/api/auth/apple/', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    auth: false,
-  })
-}
-
 export async function apiFacebookAuth(payload: {
   access_token: string
 }): Promise<AuthTokensResponse> {

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import {
-  apiAppleAuth,
   apiFacebookAuth,
   apiGoogleAuth,
   apiLogin,
@@ -11,7 +10,6 @@ import { ApiError } from '@/lib/api/types'
 import { useAuthStore, type AuthUser } from '@/store/authStore'
 
 export type GoogleAuthPayload = { credential: string } | { access_token: string }
-export type AppleAuthPayload = { id_token: string }
 export type FacebookAuthPayload = { access_token: string }
 
 interface AuthContextValue {
@@ -20,7 +18,6 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>
   signup: (email: string, password: string, name: string) => Promise<void>
   loginWithGoogle: (payload: GoogleAuthPayload) => Promise<void>
-  loginWithApple: (payload: AppleAuthPayload) => Promise<void>
   loginWithFacebook: (payload: FacebookAuthPayload) => Promise<void>
   logout: () => void
 }
@@ -121,11 +118,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persist({ user: u, access, refresh })
   }, [])
 
-  const loginWithApple = useCallback(async (payload: AppleAuthPayload) => {
-    const { user: u, access, refresh } = await apiAppleAuth(payload)
-    persist({ user: u, access, refresh })
-  }, [])
-
   const loginWithFacebook = useCallback(async (payload: FacebookAuthPayload) => {
     const { user: u, access, refresh } = await apiFacebookAuth(payload)
     persist({ user: u, access, refresh })
@@ -145,7 +137,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         loginWithGoogle,
-        loginWithApple,
         loginWithFacebook,
         logout,
       }}
