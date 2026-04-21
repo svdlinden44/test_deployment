@@ -14,3 +14,4 @@ django-storages[s3]>=1.14
 Pillow>=11.0
 django-imagekit>=5.0
 rembg[cpu]>=2.0.55
+tqdm>=4.66

@@ -1,6 +1,8 @@
 import { fetchWithAuth, request } from './client'
 import type {
   CategoryDto,
+  IngredientBrowseItem,
+  IngredientFilters,
   IngredientMini,
   MemberRecipeCreatePayload,
   PaginatedResults,
@@ -8,7 +10,6 @@ import type {
   RecipeDetail,
   RecipeFilters,
   RecipeListItem,
-  Bottle,
 } from './types'
 
 function filtersToParams(f?: RecipeFilters): Record<string, string | number | string[] | undefined> {
@@ -19,6 +20,18 @@ function filtersToParams(f?: RecipeFilters): Record<string, string | number | st
     page: page ?? undefined,
     per_page: per_page ?? undefined,
     ingredient: ingredient?.length ? ingredient : undefined,
+  }
+}
+
+function ingredientFiltersToParams(
+  f?: IngredientFilters,
+): Record<string, string | number | undefined> {
+  if (!f) return {}
+  const { page, per_page, ...rest } = f
+  return {
+    ...rest,
+    page: page ?? undefined,
+    per_page: per_page ?? undefined,
   }
 }
 
@@ -34,18 +47,36 @@ export const getRecipeBySlug = (slug: string) =>
 export const getCategories = () =>
   request<CategoryDto[]>('/api/categories/', { auth: false })
 
+/** Compact payload for recipe-filter autocomplete (Recipe Vault filter chips). */
 export const searchIngredients = (search: string, page = 1) =>
   request<PaginatedResults<IngredientMini>>('/api/ingredients/', {
-    params: { search: search || undefined, page },
+    params: { search: search || undefined, page, compact: '1' },
     auth: false,
   })
 
-export const getCabinet = () => request<Bottle[]>('/api/me/cabinet')
+export const getIngredients = (filters?: IngredientFilters, opts?: { auth?: boolean }) =>
+  request<PaginatedResults<IngredientBrowseItem>>('/api/ingredients/', {
+    params: ingredientFiltersToParams(filters),
+    auth: opts?.auth ?? false,
+  })
 
-export const updateCabinet = (bottles: Bottle[]) =>
-  request<Bottle[]>('/api/me/cabinet', {
-    method: 'PUT',
-    body: JSON.stringify(bottles),
+export const getMyCabinetIngredients = (page = 1, perPage = 24) =>
+  request<PaginatedResults<IngredientBrowseItem>>('/api/me/cabinet/', {
+    params: { page, per_page: perPage },
+    auth: true,
+  })
+
+export const addCabinetIngredient = (slug: string) =>
+  request<IngredientBrowseItem>(`/api/me/cabinet/${encodeURIComponent(slug)}/`, {
+    method: 'POST',
+    body: '{}',
+    auth: true,
+  })
+
+export const removeCabinetIngredient = (slug: string) =>
+  request<void>(`/api/me/cabinet/${encodeURIComponent(slug)}/`, {
+    method: 'DELETE',
+    auth: true,
   })
 
 export const getMyFavoriteRecipes = (page = 1, perPage = 24) =>

@@ -263,8 +263,9 @@ export function Profile() {
         </section>
 
         <p className={s.hint}>
-          Bottle inventory lives on{' '}
-          <Link to="/cabinet">My Cabinet</Link>.
+          Ingredients you stock live on{' '}
+          <Link to="/cabinet">My Cabinet</Link> — add them from the{' '}
+          <Link to="/ingredients">Ingredient Library</Link>.
         </p>
       </div>
     </div>

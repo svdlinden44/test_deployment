@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import string
+import sys
 import time
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -11,8 +12,10 @@ import requests
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.utils.text import slugify
+from tqdm import tqdm
 
 from cocktails import source_keys
+from cocktails.image_pipeline import apply_ingredient_image_cutout, apply_recipe_image_cutout
 from cocktails.importers.base import BaseCatalogImporter
 from cocktails.importers.http_image import download_into_image_field
 from cocktails.importers.measure_parse import parse_measure
@@ -25,9 +28,15 @@ from cocktails.models import (
     RecipeIngredient,
 )
 
-API_ROOT = "https://www.thecocktaildb.com/api/json/v1"
-
 DEFAULT_LETTERS = string.ascii_lowercase + string.digits
+
+
+def _cocktail_db_api_base(api_version: str, api_key: str) -> str:
+    ver = (api_version or "v1").strip().lower()
+    if not ver.startswith("v"):
+        ver = f"v{ver}"
+    return f"https://www.thecocktaildb.com/api/json/{ver}/{api_key}"
+
 
 # Lowercased strGlass → Recipe.GlassType value
 _GLASS_MAP: dict[str, str] = {
@@ -176,6 +185,24 @@ def _ingredient_metadata(row: dict[str, Any]) -> dict[str, Any]:
     return {k: row[k] for k in keep if row.get(k)}
 
 
+def _apply_api_row_to_ingredient(ing: Ingredient, row: dict[str, Any] | None) -> None:
+    if not row:
+        return
+    ing.type = _map_ingredient_type(row.get("strType"))
+    ing.description = (row.get("strDescription") or "").strip()
+    if row.get("strABV"):
+        try:
+            ing.abv = Decimal(str(row["strABV"]))
+        except (InvalidOperation, ValueError):
+            pass
+    else:
+        ing.abv = None
+
+
+def _ingredient_thumb_url(name: str) -> str:
+    return f"https://www.thecocktaildb.com/images/ingredients/{quote(name.strip())}-Medium.png"
+
+
 class TheCocktailDbImporter(BaseCatalogImporter):
     """
     Pulls drinks from TheCocktailDB public JSON API into local Recipe/Ingredient rows.
@@ -186,7 +213,7 @@ class TheCocktailDbImporter(BaseCatalogImporter):
 
     def __init__(self) -> None:
         self._session = requests.Session()
-        self._session.headers.update({"User-Agent": "TheDistillistCatalogImporter/1.1"})
+        self._session.headers.update({"User-Agent": "TheDistillistCatalogImporter/1.2"})
 
     def run(
         self,
@@ -202,11 +229,16 @@ class TheCocktailDbImporter(BaseCatalogImporter):
         letters: str,
         max_recipes: int | None,
         api_key: str,
+        api_version: str = "v1",
+        cutouts: bool = True,
+        sync_all_ingredients: bool = False,
+        show_progress: bool = True,
     ) -> None:
         key = api_key or os.environ.get("THECOCKTAILDB_API_KEY", "1")
-        self._base = f"{API_ROOT}/{key}"
+        ver = os.environ.get("THECOCKTAILDB_API_VERSION", api_version)
+        self._base = _cocktail_db_api_base(ver, key)
 
-        ids = self._collect_drink_ids(letters, delay_seconds, stderr)
+        ids = self._collect_drink_ids(letters, delay_seconds, stderr, show_progress=show_progress)
         if max_recipes is not None:
             ids = sorted(ids)[: max_recipes]
 
@@ -227,7 +259,12 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 )
                 return
 
-        for i, ext_id in enumerate(ids):
+        id_list = sorted(ids)
+        iterator: Any = id_list
+        if show_progress and not dry_run:
+            iterator = tqdm(id_list, desc="Catalog recipes", unit="drink", file=sys.stderr)
+
+        for ext_id in iterator:
             try:
                 if dry_run:
                     exists = RecipeExternalRef.objects.filter(
@@ -245,6 +282,7 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                     update=update,
                     skip_images=skip_images,
                     with_ingredient_images=with_ingredient_images,
+                    cutouts=cutouts,
                 )
                 if created is True:
                     done += 1
@@ -256,9 +294,6 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 errors += 1
                 stderr.write(style.ERROR(f"Failed id {ext_id}: {exc}"))
 
-            if (i + 1) % 50 == 0:
-                stdout.write(style.NOTICE(f"Progress: {i + 1}/{len(ids)}"))
-
         if dry_run:
             stdout.write(
                 style.SUCCESS(
@@ -266,7 +301,77 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 )
             )
         else:
-            stdout.write(style.SUCCESS(f"Done. imported/created: {done}, skipped: {skipped}, errors: {errors}"))
+            stdout.write(style.SUCCESS(f"Recipes done. imported/updated: {done}, skipped: {skipped}, errors: {errors}"))
+
+        if dry_run or not sync_all_ingredients:
+            return
+
+        ing_done, ing_err = self._import_all_ingredients_from_list(
+            stdout,
+            stderr,
+            style,
+            update=update,
+            with_images=with_ingredient_images,
+            cutouts=cutouts,
+            delay_seconds=delay_seconds,
+            show_progress=show_progress,
+        )
+        stdout.write(
+            style.SUCCESS(f"Ingredient list pass done. upserted: {ing_done}, errors: {ing_err}")
+        )
+
+    def _import_all_ingredients_from_list(
+        self,
+        stdout: Any,
+        stderr: Any,
+        style: Any,
+        *,
+        update: bool,
+        with_images: bool,
+        cutouts: bool,
+        delay_seconds: float,
+        show_progress: bool,
+    ) -> tuple[int, int]:
+        """Walk list.php?i=list so standalone ingredients get rows/images (patron/v2 lists are complete)."""
+        data = self._get("list.php", {"i": "list"})
+        rows = data.get("drinks") or data.get("ingredients") or []
+        names: list[str] = []
+        for row in rows:
+            n = row.get("strIngredient1") or row.get("strIngredient")
+            if n and str(n).strip():
+                names.append(str(n).strip())
+
+        if len(names) < 200:
+            stderr.write(
+                style.WARNING(
+                    f"Ingredient list returned only {len(names)} items. "
+                    "Free tier key `1` often caps this (~100). "
+                    "Use a patron API key and THECOCKTAILDB_API_VERSION=v2 for the full ~489 list."
+                )
+            )
+
+        done = errors = 0
+        iterator: Any = names
+        if show_progress:
+            iterator = tqdm(names, desc="Ingredients (full list)", unit="ing", file=sys.stderr)
+
+        for name in iterator:
+            try:
+                self._resolve_ingredient(
+                    name,
+                    update=update,
+                    with_images=with_images,
+                    cutouts=cutouts,
+                    force_refresh_images=update and with_images,
+                )
+                done += 1
+                if delay_seconds:
+                    time.sleep(delay_seconds)
+            except Exception as exc:  # noqa: BLE001
+                errors += 1
+                stderr.write(style.ERROR(f"Ingredient list item {name!r}: {exc}"))
+
+        return done, errors
 
     def _get(self, path: str, params: dict[str, str] | None = None) -> dict[str, Any]:
         """GET JSON with backoff when TheCocktailDB rate-limits (429) or errors (5xx)."""
@@ -287,9 +392,20 @@ class TheCocktailDbImporter(BaseCatalogImporter):
             r.raise_for_status()
         return {}
 
-    def _collect_drink_ids(self, letters: str, delay: float, stderr: Any) -> set[str]:
+    def _collect_drink_ids(
+        self,
+        letters: str,
+        delay: float,
+        stderr: Any,
+        *,
+        show_progress: bool,
+    ) -> set[str]:
         out: set[str] = set()
-        for letter in letters:
+        letter_iter: Any = letters
+        if show_progress:
+            letter_iter = tqdm(letters, desc="Discover drinks (by letter)", unit="letter", file=sys.stderr)
+
+        for letter in letter_iter:
             try:
                 data = self._get("search.php", {"f": letter})
             except requests.RequestException as exc:
@@ -310,6 +426,7 @@ class TheCocktailDbImporter(BaseCatalogImporter):
         update: bool,
         skip_images: bool,
         with_ingredient_images: bool,
+        cutouts: bool,
     ) -> bool | None:
         """Returns True if created/updated, False if skipped, None on weird empty payload."""
         data = self._get("lookup.php", {"i": ext_id})
@@ -350,6 +467,7 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 recipe.category = cat
                 recipe.is_alcoholic = _parse_is_alcoholic(d.get("strAlcoholic"))
                 recipe.glass_type = _norm_glass(d.get("strGlass"))
+                recipe.source = Recipe.Source.CATALOG
                 recipe.save()
                 ref.metadata = meta
                 ref.save(update_fields=["metadata", "updated_at"])
@@ -368,6 +486,7 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                     is_alcoholic=_parse_is_alcoholic(d.get("strAlcoholic")),
                     is_featured=False,
                     is_published=True,
+                    source=Recipe.Source.CATALOG,
                 )
                 recipe.save()
                 RecipeExternalRef.objects.create(
@@ -384,7 +503,13 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 if not name or not str(name).strip():
                     continue
                 measure = d.get(f"strMeasure{i}") or ""
-                ing = self._resolve_ingredient(str(name).strip(), with_ingredient_images)
+                ing = self._resolve_ingredient(
+                    str(name).strip(),
+                    update=update,
+                    with_images=with_ingredient_images,
+                    cutouts=cutouts,
+                    force_refresh_images=bool(update and with_ingredient_images),
+                )
                 if ing.pk in seen_ingredient_ids:
                     continue
                 seen_ingredient_ids.add(ing.pk)
@@ -400,15 +525,27 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 )
                 sort_order += 1
 
-            if not skip_images:
-                thumb = d.get("strDrinkThumb")
-                if thumb:
-                    download_into_image_field(recipe, "image", thumb)
-                    recipe.save(update_fields=["image"])
+        # Hero image + rembg after commit — keeps DB transactions short and matches member pipeline timing.
+        if not skip_images:
+            thumb = d.get("strDrinkThumb")
+            if thumb:
+                recipe = Recipe.objects.get(pk=recipe.pk)
+                download_into_image_field(recipe, "image", thumb)
+                recipe.save(update_fields=["image"])
+                if cutouts:
+                    apply_recipe_image_cutout(recipe)
 
-            return True
+        return True
 
-    def _resolve_ingredient(self, name: str, with_images: bool) -> Ingredient:
+    def _resolve_ingredient(
+        self,
+        name: str,
+        *,
+        update: bool,
+        with_images: bool,
+        cutouts: bool,
+        force_refresh_images: bool,
+    ) -> Ingredient:
         key = name.strip().lower()
         if key in self._name_cache:
             return self._name_cache[key]
@@ -428,14 +565,29 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 external_id=ext_id,
             ).select_related("ingredient").first()
             if hit:
-                self._name_cache[key] = hit.ingredient
-                return hit.ingredient
+                ing = hit.ingredient
+                if update and row:
+                    _apply_api_row_to_ingredient(ing, row)
+                    ing.save()
+                    hit.metadata = _ingredient_metadata(row)
+                    hit.save(update_fields=["metadata", "updated_at"])
+                self._maybe_fetch_ingredient_image(
+                    ing,
+                    name,
+                    with_images=with_images,
+                    cutouts=cutouts,
+                    force_refresh=force_refresh_images,
+                )
+                self._name_cache[key] = ing
+                return ing
 
         existing = Ingredient.objects.filter(name__iexact=name.strip()).first()
         if existing:
-            self._name_cache[key] = existing
+            if update and row:
+                _apply_api_row_to_ingredient(existing, row)
+                existing.save()
             if ext_id:
-                IngredientExternalRef.objects.get_or_create(
+                ref_obj, created = IngredientExternalRef.objects.get_or_create(
                     source_key=self.source_key,
                     external_id=ext_id,
                     defaults={
@@ -443,6 +595,17 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                         "metadata": _ingredient_metadata(row) if row else {},
                     },
                 )
+                if not created and row:
+                    ref_obj.metadata = _ingredient_metadata(row)
+                    ref_obj.save(update_fields=["metadata", "updated_at"])
+            self._maybe_fetch_ingredient_image(
+                existing,
+                name,
+                with_images=with_images,
+                cutouts=cutouts,
+                force_refresh=force_refresh_images,
+            )
+            self._name_cache[key] = existing
             return existing
 
         ing_type = _map_ingredient_type(row.get("strType") if row else None)
@@ -472,10 +635,34 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                 metadata=_ingredient_metadata(row) if row else {},
             )
 
-        if with_images:
-            url = f"https://www.thecocktaildb.com/images/ingredients/{quote(name.strip())}-Medium.png"
-            if download_into_image_field(ing, "image", url):
-                ing.save(update_fields=["image"])
+        self._maybe_fetch_ingredient_image(
+            ing,
+            name,
+            with_images=with_images,
+            cutouts=cutouts,
+            force_refresh=True,
+        )
 
         self._name_cache[key] = ing
         return ing
+
+    def _maybe_fetch_ingredient_image(
+        self,
+        ing: Ingredient,
+        name: str,
+        *,
+        with_images: bool,
+        cutouts: bool,
+        force_refresh: bool,
+    ) -> None:
+        if not with_images:
+            return
+        need_download = force_refresh or not ing.image
+        downloaded = False
+        if need_download:
+            url = _ingredient_thumb_url(name)
+            if download_into_image_field(ing, "image", url):
+                ing.save(update_fields=["image"])
+                downloaded = True
+        if cutouts and ing.image and downloaded:
+            apply_ingredient_image_cutout(ing)

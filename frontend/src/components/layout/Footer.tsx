@@ -29,6 +29,11 @@ export function Footer() {
                   <li><Link to="/origin-stories" className={s.link}>Origin Stories</Link></li>
                 </>
               ) : null}
+              <li>
+                <Link to="/ingredients" className={s.link}>
+                  Ingredient Library
+                </Link>
+              </li>
               {!user ? (
                 <li>
                   <Link to="/signup" className={s.link}>

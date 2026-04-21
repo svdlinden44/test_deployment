@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from argparse import ArgumentParser
 from typing import Any, ClassVar
 
@@ -13,7 +14,12 @@ from cocktails.importers.the_cocktail_db import DEFAULT_LETTERS, TheCocktailDbIm
 class Command(BaseCommand):
     help = (
         "Import cocktail catalog data into local Recipe / Ingredient rows. "
-        "Register additional importers in SOURCE_IMPORTERS."
+        "Register additional importers in SOURCE_IMPORTERS.\n\n"
+        "Full refresh with hero + ingredient thumbnails (transparent PNG cutouts are ON by default; "
+        "use --no-cutouts to skip rembg):\n"
+        "  THECOCKTAILDB_API_VERSION=v2 THECOCKTAILDB_API_KEY=<patron> \\\n"
+        "  python manage.py import_catalog --update --with-ingredient-images \\\n"
+        "    --sync-all-ingredients --delay 0.35\n"
     )
 
     SOURCE_IMPORTERS: ClassVar[dict[str, type[BaseCatalogImporter]]] = {
@@ -35,7 +41,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--update",
             action="store_true",
-            help="Refresh recipes that already have an external ref for this source.",
+            help="Refresh recipes and ingredients that already have external refs for this source.",
         )
         parser.add_argument(
             "--skip-images",
@@ -45,14 +51,29 @@ class Command(BaseCommand):
         parser.add_argument(
             "--with-ingredient-images",
             action="store_true",
-            help="Also download ingredient thumbnails from TheCocktailDB static URLs.",
+            help="Download ingredient thumbnails from TheCocktailDB static URLs.",
+        )
+        parser.add_argument(
+            "--no-cutouts",
+            action="store_true",
+            help=(
+                "Skip rembg background removal (catalog defaults to transparent PNGs like member uploads)."
+            ),
+        )
+        parser.add_argument(
+            "--sync-all-ingredients",
+            action="store_true",
+            help=(
+                "After recipes, walk list.php?i=list so every catalog ingredient gets a row "
+                "(patron + v2 returns ~489; free key often ~100)."
+            ),
         )
         parser.add_argument(
             "--delay",
             type=float,
-            default=0.12,
+            default=0.35,
             metavar="SEC",
-            help="Pause between drinks after HTTP calls (default 0.12).",
+            help="Pause between drinks / ingredient rows after HTTP work (default 0.35).",
         )
         parser.add_argument(
             "--letters",
@@ -70,6 +91,16 @@ class Command(BaseCommand):
             "--api-key",
             default="",
             help="TheCocktailDB API key segment (default: env THECOCKTAILDB_API_KEY or 1).",
+        )
+        parser.add_argument(
+            "--api-version",
+            default=os.environ.get("THECOCKTAILDB_API_VERSION", "v1"),
+            help="API path version v1 or v2 (default: env THECOCKTAILDB_API_VERSION or v1). Patron lists use v2.",
+        )
+        parser.add_argument(
+            "--no-progress",
+            action="store_true",
+            help="Disable tqdm progress bars (letter discovery, recipes, ingredient list).",
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
@@ -93,4 +124,8 @@ class Command(BaseCommand):
             letters=options["letters"],
             max_recipes=options["max_recipes"],
             api_key=options["api_key"],
+            api_version=options["api_version"],
+            cutouts=not options["no_cutouts"],
+            sync_all_ingredients=options["sync_all_ingredients"],
+            show_progress=not options["no_progress"],
         )

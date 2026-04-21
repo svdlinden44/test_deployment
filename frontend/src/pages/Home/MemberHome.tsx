@@ -32,11 +32,18 @@ const ACTIONS = [
     cta: 'See my recipes →',
   },
   {
+    to: '/ingredients',
+    eyebrow: 'Ingredient Library',
+    title: 'Build your bar',
+    body: 'Browse every spirit, syrup, and garnish — add what you own to My Cabinet.',
+    cta: 'Explore ingredients →',
+  },
+  {
     to: '/cabinet',
     eyebrow: 'My Cabinet',
-    title: 'What’s on your bar',
-    body: 'Toggle bottles and bitters so pours match what you actually stock.',
-    cta: 'Edit cabinet →',
+    title: 'What you stock',
+    body: 'Ingredients you saved from the library — your pour list at a glance.',
+    cta: 'Open cabinet →',
   },
   {
     to: '/profile',

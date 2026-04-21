@@ -1,30 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ComponentType } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import {
-  IconBottleNav,
-  IconHeartNav,
-  IconJournalNav,
-  IconListNav,
-  IconUserNav,
-} from '@/components/layout/PersonalMenuIcons'
+import { PERSONAL_NAV_LINKS } from '@/components/layout/personalNavLinks'
 import { cn } from '@/lib/utils'
 import s from './PersonalNavDropdown.module.scss'
-
-type LinkDef = {
-  to: string
-  label: string
-  Icon: ComponentType<{ className?: string }>
-  iconClass: string
-}
-
-const LINKS: readonly LinkDef[] = [
-  { to: '/favorites', label: 'Favorites', Icon: IconHeartNav, iconClass: s.iconFavorites },
-  { to: '/wishlist', label: 'Wishlist', Icon: IconListNav, iconClass: s.iconWishlist },
-  { to: '/my-recipes', label: 'My Recipes', Icon: IconJournalNav, iconClass: s.iconRecipes },
-  { to: '/cabinet', label: 'My Cabinet', Icon: IconBottleNav, iconClass: s.iconCabinet },
-  { to: '/profile', label: 'My Profile', Icon: IconUserNav, iconClass: s.iconProfile },
-] as const
 
 function personalSectionActive(pathname: string): boolean {
   if (pathname.startsWith('/favorites')) return true
@@ -69,7 +47,7 @@ export function PersonalNavDropdown() {
         </span>
       </button>
       <ul className={s.menu} role="menu">
-        {LINKS.map((item) => {
+        {PERSONAL_NAV_LINKS.map((item) => {
           const IconComp = item.Icon
           return (
             <li key={item.to} role="none">

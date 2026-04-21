@@ -88,6 +88,21 @@ export interface IngredientMini {
   type: string
 }
 
+/** GET /api/ingredients/ (browse) — includes optional cabinet flag when authenticated. */
+export interface IngredientBrowseItem extends IngredientMini {
+  description?: string
+  image_url?: string | null
+  /** Present when authenticated; omitted or false otherwise. */
+  is_in_cabinet?: boolean
+}
+
+export interface IngredientFilters {
+  search?: string
+  type?: string
+  page?: number
+  per_page?: number
+}
+
 export interface RecipeFilters {
   search?: string
   category?: string
@@ -98,14 +113,6 @@ export interface RecipeFilters {
   ingredient_match?: 'any' | 'all'
   page?: number
   per_page?: number
-}
-
-export interface Bottle {
-  id: string
-  name: string
-  category: string
-  emoji: string
-  active: boolean
 }
 
 export class ApiError extends Error {

@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/Footer'
 import { ComingSoonGuard } from '@/router/ComingSoonGuard'
 import { ProtectedRoute } from '@/router/ProtectedRoute'
 import { Cabinet } from '@/pages/Cabinet'
+import { IngredientsExplore } from '@/pages/Ingredients'
 import { Home } from '@/pages/Home'
 import { MyRecipes } from '@/pages/MyRecipes'
 import { CreateRecipe } from '@/pages/MyRecipes/CreateRecipe'
@@ -16,6 +17,7 @@ import { Profile } from '@/pages/Profile'
 import { Login } from '@/pages/Login'
 import { Signup } from '@/pages/Signup'
 import { ComingSoon } from '@/pages/ComingSoon'
+import { NotFound } from '@/pages/NotFound'
 
 function RootLayout() {
   return (
@@ -39,6 +41,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Home /> },
           { path: 'recipes', element: <Recipes /> },
+          { path: 'ingredients', element: <IngredientsExplore /> },
           { path: 'recipes/:slug', element: <RecipeDetail /> },
           { path: 'cocktails', element: <Navigate to="/recipes" replace /> },
           { path: 'origin-stories', element: <OriginStories /> },
@@ -95,6 +98,7 @@ export const router = createBrowserRouter([
       { path: '/login', element: <Login /> },
       { path: '/signup', element: <Signup /> },
       { path: '/coming-soon', element: <ComingSoon /> },
+      { path: '*', element: <NotFound /> },
     ],
   },
 ])

@@ -1,0 +1,88 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.heroLogo {
+  width: min(320px, 78vw);
+  height: auto;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+  filter: drop-shadow(0 8px 32px rgba(201, 168, 76, 0.12));
+}
+
+.code {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 5vw, 2.75rem);
+  color: var(--cream);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+
+  em {
+    font-style: italic;
+    color: var(--gold);
+  }
+}
+
+.body {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--cream-dim);
+  line-height: 1.55;
+  max-width: 26rem;
+  margin: 0 auto 2rem;
+}
+
+.punch {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 2.25rem;
+  max-width: 22rem;
+}
+
+.goldLine {
+  width: min(200px, 50vw);
+  height: 1px;
+  margin: 0 auto 2rem;
+  background: linear-gradient(to right, transparent, rgba(201, 168, 76, 0.45), transparent);
+}
+
+.homeLink {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+  text-decoration: none;
+  color: var(--gold);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.75rem;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 4px;
+  display: inline-block;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.55);
+    background: rgba(201, 168, 76, 0.06);
+  }
+}

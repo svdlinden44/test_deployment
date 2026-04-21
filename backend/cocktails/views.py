@@ -1,5 +1,6 @@
 from django.http import HttpResponse
-from django.db.models import Avg, BooleanField, Count, Exists, OuterRef, Q, Value
+from django.db.models import Avg, BooleanField, Case, Count, Exists, OuterRef, Q, Value, When
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -7,10 +8,19 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Category, Ingredient, Rating, Recipe, RecipeFavorite, RecipeWishlist
+from .models import (
+    Category,
+    Ingredient,
+    Rating,
+    Recipe,
+    RecipeFavorite,
+    RecipeWishlist,
+    UserCabinetIngredient,
+)
 from .image_pipeline import apply_recipe_image_cutout, preview_recipe_image
 from .serializers import (
     CategorySerializer,
+    IngredientBrowseSerializer,
     IngredientListSerializer,
     MemberRecipeCreateSerializer,
     RecipeDetailSerializer,
@@ -110,10 +120,10 @@ class RecipeDetailView(RetrieveAPIView):
 
 
 class IngredientSearchView(ListAPIView):
-    """For filter UI — search ingredients by name."""
+    """Browse ingredients — filter by name and type (for vault-style UI and recipe filters)."""
 
     permission_classes = [AllowAny]
-    serializer_class = IngredientListSerializer
+    serializer_class = IngredientBrowseSerializer
     pagination_class = IngredientPagination
 
     def get_queryset(self):
@@ -121,7 +131,21 @@ class IngredientSearchView(ListAPIView):
         q = self.request.query_params.get("search") or self.request.query_params.get("q")
         if q:
             qs = qs.filter(name__icontains=q)
+        typ = self.request.query_params.get("type")
+        if typ:
+            qs = qs.filter(type=typ)
+
+        user = self.request.user
+        if user.is_authenticated:
+            cab = UserCabinetIngredient.objects.filter(user=user, ingredient_id=OuterRef("pk"))
+            qs = qs.annotate(is_in_cabinet=Exists(cab))
         return qs
+
+    def get_serializer_class(self):
+        # Recipe filter autocomplete uses the lean payload.
+        if self.request.query_params.get("compact") == "1":
+            return IngredientListSerializer
+        return IngredientBrowseSerializer
 
 
 class CategoryListView(ListAPIView):
@@ -221,6 +245,54 @@ class WishlistDetailView(APIView):
     def delete(self, request, slug: str):
         recipe = get_recipe_for_member_actions(request, slug)
         RecipeWishlist.objects.filter(user=request.user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MyCabinetIngredientListView(ListAPIView):
+    """Paginated ingredients saved to my cabinet (most recently added first)."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = IngredientBrowseSerializer
+    pagination_class = IngredientPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        row_ids = list(
+            UserCabinetIngredient.objects.filter(user=user)
+            .order_by("-created_at")
+            .values_list("ingredient_id", flat=True)
+        )
+        if not row_ids:
+            return Ingredient.objects.none()
+        order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(row_ids)])
+        return (
+            Ingredient.objects.filter(pk__in=row_ids)
+            .annotate(_cabinet_order=order, is_in_cabinet=Value(True, output_field=BooleanField()))
+            .order_by("_cabinet_order")
+        )
+
+
+class CabinetIngredientDetailView(APIView):
+    """POST add ingredient to cabinet; DELETE remove — by ingredient slug."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, slug: str):
+        ing = get_object_or_404(Ingredient, slug=slug)
+        _, created = UserCabinetIngredient.objects.get_or_create(user=request.user, ingredient=ing)
+        ing_qs = Ingredient.objects.filter(pk=ing.pk).annotate(
+            is_in_cabinet=Value(True, output_field=BooleanField())
+        )
+        ing = ing_qs.first()
+        out = IngredientBrowseSerializer(ing, context={"request": request})
+        return Response(
+            out.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    def delete(self, request, slug: str):
+        ing = get_object_or_404(Ingredient, slug=slug)
+        UserCabinetIngredient.objects.filter(user=request.user, ingredient=ing).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

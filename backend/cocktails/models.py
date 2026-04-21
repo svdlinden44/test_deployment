@@ -246,6 +246,38 @@ class RecipeWishlist(models.Model):
         return f"{self.user_id} ☆ {self.recipe_id}"
 
 
+class UserCabinetIngredient(models.Model):
+    """Ingredients the member keeps on hand — sourced from Ingredient catalog rows."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="cabinet_ingredients",
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name="cabinet_memberships",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "ingredient"),
+                name="cocktails_usercabinet_user_ingredient_uniq",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=("user", "ingredient")),
+            models.Index(fields=("user", "-created_at")),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} 🍶 {self.ingredient_id}"
+
+
 class RecipeIngredient(models.Model):
     class Unit(models.TextChoices):
         OZ = "oz", "oz"

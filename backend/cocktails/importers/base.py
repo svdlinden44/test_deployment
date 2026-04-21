@@ -30,6 +30,10 @@ class BaseCatalogImporter(abc.ABC):
         letters: str,
         max_recipes: int | None,
         api_key: str,
+        api_version: str = "v1",
+        cutouts: bool = True,
+        sync_all_ingredients: bool = False,
+        show_progress: bool = True,
     ) -> None:
         """Execute import. Implementations must be idempotent per `source_key` + external id."""
 

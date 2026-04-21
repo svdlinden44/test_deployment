@@ -13,8 +13,9 @@ from .models import (
     Recipe,
     RecipeExternalRef,
     RecipeFavorite,
-    RecipeWishlist,
     RecipeIngredient,
+    RecipeWishlist,
+    UserCabinetIngredient,
 )
 
 
@@ -233,5 +234,14 @@ class RecipeWishlistAdmin(admin.ModelAdmin):
     list_filter = ("created_at",)
     search_fields = ("user__email", "recipe__title", "recipe__slug")
     raw_id_fields = ("user", "recipe")
+    date_hierarchy = "created_at"
+
+
+@admin.register(UserCabinetIngredient)
+class UserCabinetIngredientAdmin(admin.ModelAdmin):
+    list_display = ("user", "ingredient", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__email", "ingredient__name", "ingredient__slug")
+    raw_id_fields = ("user", "ingredient")
     date_hierarchy = "created_at"
 

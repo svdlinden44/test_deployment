@@ -1,6 +1,13 @@
 from rest_framework import serializers
 
-from .models import Category, Ingredient, Rating, Recipe, RecipeIngredient, RecipeWishlist
+from .models import (
+    Category,
+    Ingredient,
+    Rating,
+    Recipe,
+    RecipeIngredient,
+    RecipeWishlist,
+)
 from .utils_recipe import generate_member_recipe_slug
 from .validators import validate_half_star_rating_serializer
 
@@ -177,6 +184,36 @@ class IngredientListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ("id", "slug", "name", "type")
+
+
+class IngredientBrowseSerializer(serializers.ModelSerializer):
+    """Ingredient grid / cabinet — hero image URL + membership flag."""
+
+    image_url = serializers.SerializerMethodField()
+    is_in_cabinet = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ingredient
+        fields = ("id", "slug", "name", "type", "description", "image_url", "is_in_cabinet")
+
+    def get_image_url(self, obj: Ingredient) -> str | None:
+        if not obj.image:
+            return None
+        request = self.context.get("request")
+        url = obj.image.url
+        if request:
+            return request.build_absolute_uri(url)
+        return url
+
+    def get_is_in_cabinet(self, obj: Ingredient) -> bool:
+        if getattr(obj, "is_in_cabinet", None) is not None:
+            return bool(obj.is_in_cabinet)
+        request = self.context.get("request")
+        if not request or not getattr(request.user, "is_authenticated", False):
+            return False
+        from .models import UserCabinetIngredient
+
+        return UserCabinetIngredient.objects.filter(user=request.user, ingredient_id=obj.pk).exists()
 
 
 class CategorySerializer(serializers.ModelSerializer):

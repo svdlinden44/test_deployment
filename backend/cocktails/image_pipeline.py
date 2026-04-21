@@ -69,6 +69,45 @@ def apply_recipe_image_cutout(recipe) -> str | None:
     return pipeline
 
 
+def apply_ingredient_image_cutout(ingredient) -> str | None:
+    """
+    Replace ``ingredient.image`` with a PNG cutout (rembg when available).
+
+    Uses the same pipeline as recipe hero images for consistent transparency.
+    """
+    from django.core.files.base import ContentFile
+    from django.utils.text import slugify
+
+    if not ingredient.image:
+        return None
+
+    try:
+        ingredient.image.open("rb")
+        try:
+            raw = ingredient.image.read()
+        finally:
+            ingredient.image.close()
+    except Exception as exc:
+        logger.warning("Could not read ingredient image pk=%s: %s", ingredient.pk, exc)
+        return None
+
+    try:
+        out_bytes, pipeline = preview_recipe_image(raw)
+    except Exception as exc:
+        logger.warning("preview_recipe_image failed ingredient pk=%s: %s", ingredient.pk, exc)
+        return None
+
+    stem = slugify(ingredient.slug)[:120] or f"ingredient-{ingredient.pk}"
+    fname = f"{stem}-{ingredient.pk}.png"
+    try:
+        ingredient.image.save(fname, ContentFile(out_bytes), save=True)
+    except Exception as exc:
+        logger.warning("Could not save ingredient cutout pk=%s: %s", ingredient.pk, exc)
+        return None
+
+    return pipeline
+
+
 def schedule_recipe_image_processing(recipe_id: int) -> None:
     """Process stored media after upload (sync caller expected)."""
     from .models import Recipe
