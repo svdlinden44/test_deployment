@@ -21,7 +21,12 @@ export function Footer() {
               {user ? (
                 <>
                   <li><Link to="/recipes" className={s.link}>Recipe Vault</Link></li>
-                  <li><Link to="/profile" className={s.link}>Your Bar</Link></li>
+                  <li><Link to="/favorites" className={s.link}>Favorites</Link></li>
+                  <li><Link to="/wishlist" className={s.link}>Wishlist</Link></li>
+                  <li><Link to="/my-recipes" className={s.link}>My Recipes</Link></li>
+                  <li><Link to="/cabinet" className={s.link}>My Cabinet</Link></li>
+                  <li><Link to="/profile" className={s.link}>My Profile</Link></li>
+                  <li><Link to="/origin-stories" className={s.link}>Origin Stories</Link></li>
                 </>
               ) : null}
               {!user ? (

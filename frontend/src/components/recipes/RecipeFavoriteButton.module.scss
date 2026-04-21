@@ -1,0 +1,38 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: rgba(8, 5, 3, 0.65);
+  color: var(--gold-dim);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s, background 0.25s;
+
+  &:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201, 168, 76, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: wait;
+  }
+}
+
+.small {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
+}
+
+.active {
+  border-color: rgba(201, 168, 76, 0.55);
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.12);
+}

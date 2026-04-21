@@ -37,17 +37,111 @@
   margin-bottom: 2.5rem;
 }
 
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.favBtn {
+  flex-shrink: 0;
+}
+
+.wishBtn {
+  flex-shrink: 0;
+}
+
 .heroImg {
+  position: relative;
   margin: 0 auto 1.5rem;
   max-width: 560px;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(201, 168, 76, 0.15);
+  background: var(--dark2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1rem 1rem;
+  transition: border-color 0.22s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64%;
+    height: 18%;
+    max-height: 64px;
+    background: radial-gradient(
+      ellipse 56% 44% at 50% 50%,
+      rgba(0, 0, 0, 0.58) 0%,
+      rgba(0, 0, 0, 0.18) 48%,
+      transparent 74%
+    );
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.94;
+    transition:
+      opacity 0.26s ease,
+      transform 0.26s ease;
+  }
+
+  &:hover {
+    border-color: rgba(201, 168, 76, 0.34);
+
+    &::after {
+      opacity: 1;
+      transform: translateX(-50%) scale(1.1);
+    }
+  }
+
+  &:hover .heroImgSubject {
+    filter:
+      drop-shadow(0 0 3px rgba(201, 168, 76, 0.62))
+      drop-shadow(0 0 10px rgba(201, 168, 76, 0.35))
+      drop-shadow(0 0 46px rgba(201, 168, 76, 0.24))
+      drop-shadow(0 20px 56px rgba(0, 0, 0, 0.58))
+      drop-shadow(0 32px 68px rgba(0, 0, 0, 0.42));
+    transform: scale(1.038);
+  }
+}
+
+.heroImgSubject {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter:
+    drop-shadow(0 0 2px rgba(201, 168, 76, 0.42))
+    drop-shadow(0 0 4px rgba(201, 168, 76, 0.22))
+    drop-shadow(0 0 32px rgba(201, 168, 76, 0.16))
+    drop-shadow(0 14px 40px rgba(0, 0, 0, 0.52))
+    drop-shadow(0 24px 52px rgba(0, 0, 0, 0.36));
+  transition:
+    filter 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 
   img {
     display: block;
     width: 100%;
     height: auto;
+    max-height: min(70vh, 520px);
+    object-fit: contain;
+    object-position: center;
     vertical-align: middle;
   }
 }

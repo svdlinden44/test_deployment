@@ -2,7 +2,11 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxValueValidator, MinValueValidator
+from decimal import Decimal
+
 from django.db import models
+
+from .validators import validate_half_star_rating
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
 
@@ -62,6 +66,12 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    class Source(models.TextChoices):
+        """Catalog rows come from imports; member rows are created by users."""
+
+        CATALOG = "catalog", "Catalog"
+        MEMBER = "member", "Member"
+
     class Difficulty(models.TextChoices):
         EASY = "easy", "Easy"
         MEDIUM = "medium", "Medium"
@@ -132,6 +142,18 @@ class Recipe(models.Model):
     is_featured = models.BooleanField(default=False, help_text="Show on the homepage")
     is_published = models.BooleanField(default=True)
 
+    source = models.CharField(
+        max_length=10,
+        choices=Source.choices,
+        default=Source.CATALOG,
+        db_index=True,
+        help_text="Catalog recipes appear in Recipe Vault; member recipes are personal until public.",
+    )
+    is_public = models.BooleanField(
+        default=False,
+        help_text="When True, member recipe could appear in vault (reserved for future use).",
+    )
+
     gallery = GenericRelation("Image", related_query_name="recipe")
 
     created_by = models.ForeignKey(
@@ -158,6 +180,70 @@ class Recipe(models.Model):
     @property
     def rating_count(self):
         return self.ratings.count()
+
+
+class RecipeFavorite(models.Model):
+    """Member-saved catalog (or accessible) recipe — favorites list."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="recipe_favorites",
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="favorited_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "recipe"),
+                name="cocktails_recipefavorite_user_recipe_uniq",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=("user", "recipe")),
+            models.Index(fields=("user", "-created_at")),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} ♥ {self.recipe_id}"
+
+
+class RecipeWishlist(models.Model):
+    """Bookmark / wishlist — independent from favorites."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="recipe_wishlist",
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="wishlisted_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "recipe"),
+                name="cocktails_recipewishlist_user_recipe_uniq",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=("user", "recipe")),
+            models.Index(fields=("user", "-created_at")),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} ☆ {self.recipe_id}"
 
 
 class RecipeIngredient(models.Model):
@@ -199,8 +285,14 @@ class RecipeIngredient(models.Model):
 class Rating(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="ratings")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ratings")
-    score = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    score = models.DecimalField(
+        max_digits=2,
+        decimal_places=1,
+        validators=[
+            MinValueValidator(Decimal("1")),
+            MaxValueValidator(Decimal("5")),
+            validate_half_star_rating,
+        ],
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

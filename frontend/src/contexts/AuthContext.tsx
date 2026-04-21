@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import {
   apiFacebookAuth,
+  apiGetProfile,
   apiGoogleAuth,
   apiLogin,
   apiRegister,
   apiRefreshToken,
+  mergeProfileIntoUser,
 } from '@/lib/api/auth'
-import { ApiError } from '@/lib/api/types'
+import { ApiError, type MemberProfile } from '@/lib/api/types'
 import { useAuthStore, type AuthUser } from '@/store/authStore'
 
 export type GoogleAuthPayload = { credential: string } | { access_token: string }
@@ -15,6 +17,10 @@ export type FacebookAuthPayload = { access_token: string }
 interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
+  /** Re-fetch profile from the server and merge into stored user (avatar, name). */
+  refreshUser: () => Promise<void>
+  /** Apply an API profile payload without an extra GET (e.g. after PATCH profile). */
+  applyMemberProfile: (profile: MemberProfile) => void
   login: (email: string, password: string) => Promise<void>
   signup: (email: string, password: string, name: string) => Promise<void>
   loginWithGoogle: (payload: GoogleAuthPayload) => Promise<void>
@@ -75,7 +81,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const { access } = await apiRefreshToken(parsed.refresh)
             setAccessToken(access)
-            const next: StoredAuth = { ...parsed, access }
+            let mergedUser = parsed.user
+            try {
+              const profile = await apiGetProfile()
+              mergedUser = mergeProfileIntoUser(parsed.user, profile)
+              setUser(mergedUser)
+              setAuth(mergedUser, access, parsed.refresh)
+            } catch {
+              /* profile fetch optional */
+            }
+            const next: StoredAuth = { user: mergedUser, access, refresh: parsed.refresh }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
           } catch {
             /* keep existing access until first 401 */
@@ -129,11 +144,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAuth()
   }
 
+  const refreshUser = useCallback(async () => {
+    const token = useAuthStore.getState().token
+    const refreshTok = useAuthStore.getState().refreshToken
+    const u = useAuthStore.getState().user
+    if (!token || !refreshTok || !u) return
+    try {
+      const profile = await apiGetProfile()
+      persist({ user: mergeProfileIntoUser(u, profile), access: token, refresh: refreshTok })
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const applyMemberProfile = useCallback((profile: MemberProfile) => {
+    const token = useAuthStore.getState().token
+    const refreshTok = useAuthStore.getState().refreshToken
+    const u = useAuthStore.getState().user
+    if (!token || !refreshTok || !u) return
+    persist({ user: mergeProfileIntoUser(u, profile), access: token, refresh: refreshTok })
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
+        refreshUser,
+        applyMemberProfile,
         login,
         signup,
         loginWithGoogle,

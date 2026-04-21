@@ -21,4 +21,6 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    _media_root = getattr(settings, "MEDIA_ROOT", None)
+    if _media_root:
+        urlpatterns += static(settings.MEDIA_URL, document_root=_media_root)

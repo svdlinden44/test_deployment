@@ -4,25 +4,53 @@ import s from './MemberHome.module.scss'
 
 const ACTIONS = [
   {
+    to: '/recipes',
+    eyebrow: 'Recipe Vault',
+    title: 'Browse every cocktail',
+    body: 'Search by spirit, glass, ingredients, and difficulty — the full catalog.',
+    cta: 'Open Recipe Vault →',
+  },
+  {
+    to: '/favorites',
+    eyebrow: 'Favorites',
+    title: 'Recipes you’ve hearted',
+    body: 'Saved from the vault — independent from wishlist and your authored recipes.',
+    cta: 'View favorites →',
+  },
+  {
+    to: '/wishlist',
+    eyebrow: 'Wishlist',
+    title: 'Want to try later',
+    body: 'A separate list from favorites — track cocktails you’re curious about.',
+    cta: 'Open wishlist →',
+  },
+  {
+    to: '/my-recipes',
+    eyebrow: 'My Recipes',
+    title: 'Your own creations',
+    body: 'Member-authored recipes — private by default; sharing comes later.',
+    cta: 'See my recipes →',
+  },
+  {
+    to: '/cabinet',
+    eyebrow: 'My Cabinet',
+    title: 'What’s on your bar',
+    body: 'Toggle bottles and bitters so pours match what you actually stock.',
+    cta: 'Edit cabinet →',
+  },
+  {
     to: '/profile',
-    eyebrow: 'Your bar',
-    title: 'Build your cabinet',
-    body: 'Log bottles, bitters, and mixers so we can tailor what you can pour tonight.',
-    cta: 'Open your bar →',
+    eyebrow: 'My Profile',
+    title: 'Account & photo',
+    body: 'Display name, password, and profile picture.',
+    cta: 'Edit profile →',
   },
   {
-    to: '/recipes',
-    eyebrow: 'Explore',
-    title: 'Browse the recipe vault',
-    body: 'Search by mood, ingredient, glass, or difficulty — then save what you love.',
-    cta: 'Browse recipes →',
-  },
-  {
-    to: '/recipes',
-    eyebrow: 'Dig in',
-    title: 'Dial in what to pour',
-    body: 'Search by ingredient, glass, difficulty, or mood — then bookmark recipes for tonight.',
-    cta: 'Search recipes →',
+    to: '/origin-stories',
+    eyebrow: 'Origin Stories',
+    title: 'History & lore',
+    body: 'Essays on the classics — editorial pages landing soon.',
+    cta: 'Read Origin Stories →',
   },
 ] as const
 
@@ -41,15 +69,15 @@ export function MemberHome() {
           <em>{greeting}</em>
         </h1>
         <p className={s.lead}>
-          Start with your cabinet, browse the vault, or experiment with originals — pick one and
-          we&apos;ll remember where you left off on any device.
+          Pick a destination below — naming matches the menu in the nav so you always know where you
+          are.
         </p>
       </header>
 
-      <section className={s.gridSection} aria-label="What to do next">
+      <section className={s.gridSection} aria-label="Member destinations">
         <div className={s.grid}>
           {ACTIONS.map((item) => (
-            <Link key={item.title} to={item.to} className={s.card}>
+            <Link key={item.title + item.to} to={item.to} className={s.card}>
               <span className={s.cardEyebrow}>{item.eyebrow}</span>
               <h2 className={s.cardTitle}>{item.title}</h2>
               <p className={s.cardBody}>{item.body}</p>

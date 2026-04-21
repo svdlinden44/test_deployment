@@ -1,0 +1,176 @@
+.root {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cream-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.25rem;
+  font-family: inherit;
+  transition: color 0.3s;
+
+  &:hover {
+    color: var(--gold);
+  }
+}
+
+.chev {
+  font-size: 0.65rem;
+  opacity: 0.85;
+}
+
+.rootActive .trigger {
+  color: var(--gold);
+}
+
+.menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin: 0;
+  padding: 0.45rem 0;
+  list-style: none;
+  background: rgba(12, 9, 7, 0.98);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  z-index: 950;
+  min-width: 216px;
+
+  /*
+    Bridge the hover gap: the <li> only wraps the trigger’s in-flow height, so the gap
+    below the trigger was “dead air” and killed .root:hover before reaching the panel.
+    This invisible strip sits above the panel and keeps pointer events on a descendant.
+  */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 14px;
+    pointer-events: auto;
+  }
+}
+
+.rootOpen .menu,
+.root:hover .menu {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .root:hover .menu {
+    display: none;
+  }
+
+  .rootOpen .menu {
+    display: block;
+  }
+}
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1rem 0.55rem 0.85rem;
+  color: var(--cream-dim);
+  text-decoration: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.08);
+    color: var(--cream);
+
+    .menuIcon {
+      color: var(--gold-lt);
+    }
+  }
+}
+
+.menuLabel {
+  flex: 1;
+}
+
+.menuIcon {
+  flex-shrink: 0;
+  color: var(--gold-dim);
+  transition: color 0.2s;
+}
+
+.iconFavorites {
+  color: rgba(212, 120, 120, 0.85);
+}
+
+.iconWishlist {
+  color: rgba(180, 200, 230, 0.88);
+}
+
+.iconRecipes {
+  color: var(--gold);
+}
+
+.iconCabinet {
+  color: rgba(196, 168, 128, 0.95);
+}
+
+.iconProfile {
+  color: var(--cream-dim);
+}
+
+.menuLink:hover .iconFavorites {
+  color: #e8a0a0;
+}
+
+.menuLink:hover .iconWishlist {
+  color: #c8daf0;
+}
+
+.menuLink:hover .iconRecipes {
+  color: var(--gold-lt);
+}
+
+.menuLink:hover .iconCabinet {
+  color: var(--gold-lt);
+}
+
+.menuLink:hover .iconProfile {
+  color: var(--cream);
+}
+
+.menuLinkActive {
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.06);
+
+  .iconFavorites {
+    color: #f0b0b0;
+  }
+
+  .iconWishlist {
+    color: #d4e4f8;
+  }
+
+  .iconRecipes {
+    color: var(--gold-lt);
+  }
+
+  .iconCabinet {
+    color: var(--gold-lt);
+  }
+
+  .iconProfile {
+    color: var(--cream);
+  }
+}

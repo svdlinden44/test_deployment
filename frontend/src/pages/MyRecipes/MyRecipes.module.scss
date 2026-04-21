@@ -1,0 +1,88 @@
+@use '../../styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--dark);
+  padding: 7rem 1.25rem 4rem;
+  color: var(--cream);
+}
+
+.hero {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.label {
+  @include label;
+  display: block;
+  text-align: center;
+}
+
+.title {
+  @include sectionTitle;
+  margin-top: 0.75rem;
+}
+
+.sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--cream-dim);
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  line-height: 1.45;
+}
+
+.heroActions {
+  margin-top: 1.25rem;
+}
+
+.heroLink {
+  display: inline-block;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.35);
+  padding-bottom: 0.15rem;
+
+  &:hover {
+    color: var(--cream);
+    border-bottom-color: rgba(255, 248, 235, 0.35);
+  }
+}
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.meta {
+  font-size: 0.85rem;
+  color: var(--cream-dim);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.err {
+  color: #f4b4a8;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.empty {
+  color: var(--cream-dim);
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 2rem;
+
+  a {
+    color: var(--gold);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

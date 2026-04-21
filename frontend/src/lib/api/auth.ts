@@ -1,5 +1,5 @@
 import { request } from './client'
-import type { AuthUser } from './types'
+import type { AuthUser, MemberProfile } from './types'
 
 export type AuthTokensResponse = {
   user: AuthUser
@@ -53,4 +53,43 @@ export async function apiRefreshToken(refresh: string): Promise<{ access: string
     body: JSON.stringify({ refresh }),
     auth: false,
   })
+}
+
+export async function apiGetProfile(): Promise<MemberProfile> {
+  return request<MemberProfile>('/api/auth/profile/', { method: 'GET' })
+}
+
+export async function apiUpdateProfile(form: FormData): Promise<MemberProfile> {
+  return request<MemberProfile>('/api/auth/profile/', {
+    method: 'PATCH',
+    body: form,
+  })
+}
+
+/** JSON-only updates (e.g. clear avatar with `{ avatar: null }`). */
+export async function apiUpdateProfileJson(body: Record<string, unknown>): Promise<MemberProfile> {
+  return request<MemberProfile>('/api/auth/profile/', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function apiChangePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await request<{ detail: string }>('/api/auth/password/', {
+    method: 'POST',
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  })
+}
+
+/** Merge server profile fields into the stored member user object. */
+export function mergeProfileIntoUser(user: AuthUser, profile: MemberProfile): AuthUser {
+  return {
+    ...user,
+    email: profile.email,
+    name: profile.name,
+    avatar_url: profile.avatar_url,
+  }
 }

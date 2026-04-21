@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { RecipeFavoriteButton } from '@/components/recipes/RecipeFavoriteButton'
+import { RecipeWishlistButton } from '@/components/recipes/RecipeWishlistButton'
+import { RecipeRatingInput } from '@/components/recipes/RecipeRatingInput'
 import { getRecipeBySlug } from '@/lib/api/endpoints'
 import type { RecipeDetail as RecipeDetailType } from '@/lib/api/types'
 import { ApiError } from '@/lib/api/types'
@@ -44,6 +47,9 @@ function formatIngredientLine(row: RecipeDetailType['ingredients'][number]): str
 export function RecipeDetail() {
   const { slug } = useParams<{ slug: string }>()
   const [recipe, setRecipe] = useState<RecipeDetailType | null>(null)
+  const [favorite, setFavorite] = useState(false)
+  const [wishlist, setWishlist] = useState(false)
+  const [myRating, setMyRating] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -55,7 +61,12 @@ export function RecipeDetail() {
       setError(null)
       try {
         const data = await getRecipeBySlug(slug)
-        if (!cancelled) setRecipe(data)
+        if (!cancelled) {
+          setRecipe(data)
+          setFavorite(!!data.is_favorited)
+          setWishlist(!!data.is_wishlisted)
+          setMyRating(data.my_rating ?? null)
+        }
       } catch (e) {
         if (!cancelled) {
           setRecipe(null)
@@ -77,7 +88,7 @@ export function RecipeDetail() {
     <div className={s.page}>
       <div className={s.inner}>
         <Link to="/recipes" className={s.back}>
-          ← Back to recipes
+          ← Back to Recipe Vault
         </Link>
 
         {loading && <p className={s.muted}>Loading…</p>}
@@ -88,10 +99,47 @@ export function RecipeDetail() {
             <header className={s.header}>
               {recipe.image_url && (
                 <div className={s.heroImg}>
-                  <img src={recipe.image_url} alt="" />
+                  <div className={s.heroImgSubject}>
+                    <img src={recipe.image_url} alt="" />
+                  </div>
                 </div>
               )}
-              <h1 className={s.title}>{recipe.title}</h1>
+              <div className={s.titleBlock}>
+                <h1 className={s.title}>{recipe.title}</h1>
+                <div className={s.actionRow}>
+                  <RecipeFavoriteButton
+                    slug={recipe.slug}
+                    isFavorited={favorite}
+                    onChange={setFavorite}
+                    className={s.favBtn}
+                  />
+                  <RecipeWishlistButton
+                    slug={recipe.slug}
+                    isWishlisted={wishlist}
+                    onChange={setWishlist}
+                    className={s.wishBtn}
+                  />
+                </div>
+                <RecipeRatingInput
+                  slug={recipe.slug}
+                  value={myRating}
+                  averageRating={recipe.average_rating}
+                  ratingCount={recipe.rating_count}
+                  onChange={(detail) => {
+                    setMyRating(detail.myRating)
+                    setRecipe((prev) =>
+                      prev && prev.slug === recipe.slug
+                        ? {
+                            ...prev,
+                            my_rating: detail.myRating,
+                            average_rating: detail.averageRating,
+                            rating_count: detail.ratingCount,
+                          }
+                        : prev,
+                    )
+                  }}
+                />
+              </div>
               <p className={s.lede}>{recipe.description}</p>
               <ul className={s.meta}>
                 {recipe.category && <li>{recipe.category.name}</li>}

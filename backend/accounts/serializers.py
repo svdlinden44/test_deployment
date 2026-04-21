@@ -1,8 +1,75 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
 User = get_user_model()
+
+
+def _avatar_url_representation(obj: User, request) -> str | None:
+    if not getattr(obj, "avatar", None) or not obj.avatar:
+        return None
+    url = obj.avatar.url
+    if isinstance(url, str) and url.startswith(("http://", "https://")):
+        return url
+    return request.build_absolute_uri(url)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """Member profile for GET responses."""
+
+    name = serializers.CharField(source="first_name", max_length=150)
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ("email", "name", "avatar_url")
+        read_only_fields = ("email",)
+
+    def get_avatar_url(self, obj: User) -> str | None:
+        req = self.context.get("request")
+        if req is None:
+            return None
+        return _avatar_url_representation(obj, req)
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="first_name", max_length=150, required=False)
+
+    avatar = serializers.ImageField(
+        required=False,
+        allow_null=True,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=("jpg", "jpeg", "png", "webp", "gif"),
+            ),
+        ],
+    )
+
+    class Meta:
+        model = User
+        fields = ("name", "avatar")
+
+    def validate_avatar(self, value):
+        if value and getattr(value, "size", 0) > 5 * 1024 * 1024:
+            raise serializers.ValidationError("Image must be 5 MB or smaller.")
+        return value
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_current_password(self, value: str) -> str:
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+
+    def save(self) -> None:
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save(update_fields=["password"])
 
 
 class RegisterSerializer(serializers.Serializer):

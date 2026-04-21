@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { RecipeCard } from '@/components/recipes/RecipeCard'
+import rc from '@/components/recipes/RecipeCard.module.scss'
+import { RecipeFavoriteButton } from '@/components/recipes/RecipeFavoriteButton'
+import { RecipeWishlistButton } from '@/components/recipes/RecipeWishlistButton'
+import { useAuth } from '@/contexts/AuthContext'
 import { getCategories, getRecipes, searchIngredients } from '@/lib/api/endpoints'
 import type { CategoryDto, RecipeFilters, RecipeListItem, IngredientMini } from '@/lib/api/types'
 import { ApiError } from '@/lib/api/types'
@@ -38,6 +43,7 @@ function readsParams(sp: URLSearchParams): InitialFilters {
 const PER_PAGE = 24
 
 export function Recipes() {
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const initial = useMemo(() => readsParams(searchParams), []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -154,7 +160,10 @@ export function Recipes() {
       hasMoreRef.current = false
       nextFetchRef.current = 1
       try {
-        const res = await getRecipes({ ...apiFilters, page: 1, per_page: PER_PAGE })
+        const res = await getRecipes(
+          { ...apiFilters, page: 1, per_page: PER_PAGE },
+          { auth: !!user },
+        )
         if (cancelled || epoch !== filterEpoch.current) return
         setRecipes(res.results)
         setTotalCount(res.count)
@@ -177,7 +186,7 @@ export function Recipes() {
     return () => {
       cancelled = true
     }
-  }, [apiFilters])
+  }, [apiFilters, user])
 
   const loadMore = useCallback(async () => {
     if (!hasMoreRef.current || loadingInitial || loadingMoreGuard.current) return
@@ -189,7 +198,10 @@ export function Recipes() {
     setLoadingMore(true)
     setError(null)
     try {
-      const res = await getRecipes({ ...apiFilters, page, per_page: PER_PAGE })
+      const res = await getRecipes(
+        { ...apiFilters, page, per_page: PER_PAGE },
+        { auth: !!user },
+      )
       setRecipes((prev) => [...prev, ...res.results])
       setTotalCount(res.count)
       const more = Boolean(res.next)
@@ -204,7 +216,7 @@ export function Recipes() {
       setLoadingMore(false)
       loadingMoreGuard.current = false
     }
-  }, [apiFilters, loadingInitial])
+  }, [apiFilters, loadingInitial, user])
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -245,6 +257,10 @@ export function Recipes() {
 
   function removeIngredient(slug: string) {
     setSelectedIngredients((prev) => prev.filter((i) => i.slug !== slug))
+  }
+
+  function updateRecipeFlags(id: number, patch: Partial<RecipeListItem>) {
+    setRecipes((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)))
   }
 
   function clearFilters() {
@@ -412,35 +428,41 @@ export function Recipes() {
             <p className={s.empty}>No recipes match these filters.</p>
           )}
 
-          <ul className={s.grid}>
+          <ul className={rc.grid}>
             {recipes.map((r) => (
               <li key={r.id}>
-                <Link className={s.card} to={`/recipes/${r.slug}`}>
-                  <div className={s.cardImgWrap}>
-                    {r.image_url ? (
-                      <img src={r.image_url} alt="" className={s.cardImg} />
-                    ) : (
-                      <div className={s.cardImgPh} aria-hidden />
-                    )}
-                  </div>
-                  <div className={s.cardBody}>
-                    <h2 className={s.cardTitle}>{r.title}</h2>
-                    <p className={s.cardDesc}>{r.description}</p>
-                    <span className={s.cardMeta}>
-                      {r.category?.name ?? 'Uncategorized'}
-                      {r.is_alcoholic ? '' : ' · Alcohol-free'}
-                    </span>
-                  </div>
-                </Link>
+                <RecipeCard
+                  recipe={r}
+                  actions={
+                    user ? (
+                      <>
+                        <RecipeFavoriteButton
+                          slug={r.slug}
+                          isFavorited={!!r.is_favorited}
+                          onChange={(next) => updateRecipeFlags(r.id, { is_favorited: next })}
+                          className={rc.cardFavorite}
+                          small
+                        />
+                        <RecipeWishlistButton
+                          slug={r.slug}
+                          isWishlisted={!!r.is_wishlisted}
+                          onChange={(next) => updateRecipeFlags(r.id, { is_wishlisted: next })}
+                          className={rc.cardWish}
+                          small
+                        />
+                      </>
+                    ) : undefined
+                  }
+                />
               </li>
             ))}
           </ul>
 
           {/* Sentinel + load-more spinner */}
-          <div ref={sentinelRef} className={s.sentinel} aria-hidden />
+          <div ref={sentinelRef} className={rc.sentinel} aria-hidden />
           {loadingMore && <LogoSpinner />}
           {!hasMore && recipes.length > 0 && !loadingInitial && (
-            <p className={s.endHint}>You&apos;ve reached the end of the list.</p>
+            <p className={rc.endHint}>You&apos;ve reached the end of the list.</p>
           )}
         </div>
       </div>

@@ -1,0 +1,31 @@
+.face {
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.faceInteractive .pathGold {
+  fill: #ffe9a8;
+  stroke: rgba(255, 252, 235, 0.55);
+}
+
+.faceMini .pathGold {
+  fill: #dcc070;
+  stroke: rgba(255, 235, 200, 0.35);
+}
+
+.pathDim {
+  fill: rgba(255, 248, 235, 0.08);
+  stroke: rgba(201, 168, 76, 0.22);
+  stroke-width: 0.65;
+}
+
+.pathGold {
+  fill: #f2d58a;
+  stroke: rgba(255, 245, 210, 0.65);
+  stroke-width: 0.35;
+}
+
+.pathGoldMini {
+  stroke-width: 0.25;
+}

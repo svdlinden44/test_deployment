@@ -25,6 +25,12 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
     )
+    avatar = models.ImageField(
+        "Profile picture",
+        upload_to="avatars/%Y/%m/",
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         db_table = "accounts_user"

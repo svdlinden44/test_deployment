@@ -1,7 +1,28 @@
 import { useAuthStore } from '@/store/authStore'
 import { ApiError } from './types'
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+/** In dev, prefer same-origin `/api` (Vite proxy → http://127.0.0.1:8000). A copied production `.env`
+ *  with `VITE_API_BASE_URL=https://…` bypasses the proxy and breaks local API access. Opt out with
+ *  `VITE_ALLOW_REMOTE_API_IN_DEV=true` when you intentionally hit a remote API from `npm run dev`.
+ */
+function resolveApiBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/$/, '')
+  const allowRemote =
+    import.meta.env.VITE_ALLOW_REMOTE_API_IN_DEV === 'true' ||
+    import.meta.env.VITE_ALLOW_REMOTE_API_IN_DEV === '1'
+  if (import.meta.env.DEV && raw && !allowRemote) {
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn(
+        '[api] DEV: ignoring VITE_API_BASE_URL so requests use the Vite proxy (/api → http://127.0.0.1:8000). ' +
+          'Unset it in frontend/.env or set VITE_ALLOW_REMOTE_API_IN_DEV=true to use the configured URL.',
+      )
+    }
+    return ''
+  }
+  return raw
+}
+
+const BASE_URL = resolveApiBaseUrl()
 
 function buildRequestUrl(path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`
@@ -61,7 +82,12 @@ export async function request<T>(
 
   const token = useAuthStore.getState().token
   const headers = new Headers(fetchInit.headers)
-  headers.set('Content-Type', 'application/json')
+  const body = fetchInit.body
+  const isFormData =
+    typeof FormData !== 'undefined' && body instanceof FormData
+  if (!isFormData && body !== undefined && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
   if (auth && token) headers.set('Authorization', `Bearer ${token}`)
 
   let res: Response
@@ -89,5 +115,60 @@ export async function request<T>(
     throw new ApiError(res.status, code, message)
   }
 
-  return res.json() as Promise<T>
+  const text = await res.text()
+  if (!text.trim()) {
+    return undefined as T
+  }
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    return undefined as T
+  }
+}
+
+/** Authenticated fetch for non-JSON bodies (blobs). Throws {@link ApiError} on HTTP errors. */
+export async function fetchWithAuth(
+  path: string,
+  init: RequestInit & { auth?: boolean } = {},
+): Promise<Response> {
+  const { auth = true, ...fetchInit } = init
+  const urlObj = new URL(buildRequestUrl(path))
+  const url = urlObj.toString()
+
+  const token = useAuthStore.getState().token
+  const headers = new Headers(fetchInit.headers)
+  const body = fetchInit.body
+  const isFormData =
+    typeof FormData !== 'undefined' && body instanceof FormData
+  if (!isFormData && body !== undefined && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+  if (auth && token) headers.set('Authorization', `Bearer ${token}`)
+
+  let res: Response
+  try {
+    res = await fetch(url, { ...fetchInit, headers })
+  } catch (e) {
+    const msg =
+      e instanceof TypeError && e.message === 'Failed to fetch'
+        ? 'Could not reach the API. Check your connection, or try again in a moment.'
+        : e instanceof Error
+          ? e.message
+          : 'Network error'
+    throw new ApiError(0, 'NETWORK', msg)
+  }
+
+  if (!res.ok) {
+    const bodyJson = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    const message = parseApiErrorMessage(bodyJson, res.statusText)
+    const code =
+      typeof bodyJson.code === 'string'
+        ? bodyJson.code
+        : typeof bodyJson.detail === 'string'
+          ? 'DETAIL'
+          : 'UNKNOWN'
+    throw new ApiError(res.status, code, message)
+  }
+
+  return res
 }

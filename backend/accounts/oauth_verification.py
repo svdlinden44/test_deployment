@@ -60,7 +60,10 @@ def facebook_profile_from_token(access_token: str) -> dict[str, Any] | None:
     try:
         r = requests.get(
             "https://graph.facebook.com/me",
-            params={"fields": "id,name,email", "access_token": access_token},
+            params={
+                "fields": "id,name,email,picture.type(large)",
+                "access_token": access_token,
+            },
             timeout=15,
         )
     except requests.RequestException as e:

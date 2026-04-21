@@ -12,6 +12,8 @@ from .models import (
     Rating,
     Recipe,
     RecipeExternalRef,
+    RecipeFavorite,
+    RecipeWishlist,
     RecipeIngredient,
 )
 
@@ -215,4 +217,21 @@ class ImageAdmin(admin.ModelAdmin):
     def preview(self, obj):
         return _thumb(obj, field="file", size=300)
 
+
+@admin.register(RecipeFavorite)
+class RecipeFavoriteAdmin(admin.ModelAdmin):
+    list_display = ("user", "recipe", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__email", "recipe__title", "recipe__slug")
+    raw_id_fields = ("user", "recipe")
+    date_hierarchy = "created_at"
+
+
+@admin.register(RecipeWishlist)
+class RecipeWishlistAdmin(admin.ModelAdmin):
+    list_display = ("user", "recipe", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__email", "recipe__title", "recipe__slug")
+    raw_id_fields = ("user", "recipe")
+    date_hierarchy = "created_at"
 

@@ -1,0 +1,81 @@
+@use '../../styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background: var(--dark);
+  padding: 7rem 1.25rem 5rem;
+  color: var(--cream);
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.hero {
+  margin-bottom: 3rem;
+}
+
+.label {
+  @include label;
+}
+
+.title {
+  @include sectionTitle;
+  margin-top: 0.75rem;
+}
+
+.lead {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--cream-dim);
+  line-height: 1.55;
+  margin-top: 1rem;
+}
+
+.section {
+  background: var(--dark2);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 6px;
+  padding: 2rem;
+}
+
+.h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  color: var(--gold);
+  margin: 0 0 1.25rem;
+  font-weight: 400;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.topic {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 0.35rem;
+}
+
+.blurb {
+  font-size: 0.92rem;
+  color: var(--cream-dim);
+  line-height: 1.5;
+}
+
+.note {
+  margin-top: 2rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+}

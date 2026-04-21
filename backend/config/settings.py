@@ -168,12 +168,18 @@ CORS_ALLOWED_ORIGINS = [
     for origin in os.environ.get("CORS_ALLOWED_ORIGINS", _cors_defaults).split(",")
     if origin.strip()
 ]
+CORS_EXPOSE_HEADERS = ["X-Preview-Pipeline"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ),
 }
 
 SIMPLE_JWT = {

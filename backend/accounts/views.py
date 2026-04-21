@@ -6,13 +6,15 @@ from django.contrib.auth import get_user_model
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import jwt
 
+from .avatar_utils import assign_avatar_from_url_if_empty, facebook_profile_picture_url
 from .oauth_verification import (
     facebook_debug_token,
     facebook_profile_from_token,
@@ -25,6 +27,9 @@ from .serializers import (
     FacebookAuthSerializer,
     GoogleAuthSerializer,
     LoginSerializer,
+    PasswordChangeSerializer,
+    ProfileSerializer,
+    ProfileUpdateSerializer,
     RegisterSerializer,
 )
 
@@ -46,21 +51,31 @@ def _reject_staff_consumer_login(user: User) -> Response | None:
     return None
 
 
-def _user_payload(user: User) -> dict:
+def _user_payload(user: User, request) -> dict:
     name = (user.get_full_name() or user.first_name or user.email.split("@")[0]).strip()
+    avatar_url = None
+    if getattr(user, "avatar", None) and user.avatar:
+        raw = user.avatar.url
+        if isinstance(raw, str) and raw.startswith(("http://", "https://")):
+            avatar_url = raw
+        elif request is not None:
+            avatar_url = request.build_absolute_uri(raw)
+        else:
+            avatar_url = raw
     return {
         "id": str(user.pk),
         "email": user.email,
         "name": name or user.email.split("@")[0],
+        "avatar_url": avatar_url,
     }
 
 
-def _issue_tokens(user: User) -> dict:
+def _issue_tokens(user: User, request) -> dict:
     refresh = RefreshToken.for_user(user)
     return {
         "access": str(refresh.access_token),
         "refresh": str(refresh),
-        "user": _user_payload(user),
+        "user": _user_payload(user, request),
     }
 
 
@@ -76,6 +91,25 @@ def _google_profile_from_access_token(access_token: str) -> dict | None:
     if r.status_code != 200:
         return None
     return r.json()
+
+
+def _google_userinfo_email_verified(data: dict) -> bool:
+    """OAuth userinfo sometimes returns email_verified as bool or string."""
+    v = data.get("email_verified")
+    if v is True:
+        return True
+    if v is False:
+        return False
+    if isinstance(v, str):
+        s = v.strip().lower()
+        if s in ("false", "0", "no", "f", "n"):
+            return False
+        if s in ("true", "1", "yes", "t"):
+            return True
+    if v is None:
+        # Field sometimes omitted when verified; avoid blocking login.
+        return True
+    return False
 
 
 def _upsert_oauth_user(
@@ -137,7 +171,7 @@ class RegisterView(APIView):
         ser = RegisterSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         user = ser.save()
-        return Response(_issue_tokens(user), status=status.HTTP_201_CREATED)
+        return Response(_issue_tokens(user, request), status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -150,7 +184,7 @@ class LoginView(APIView):
         blocked = _reject_staff_consumer_login(user)
         if blocked:
             return blocked
-        return Response(_issue_tokens(user))
+        return Response(_issue_tokens(user, request))
 
 
 class GoogleAuthView(APIView):
@@ -203,7 +237,7 @@ class GoogleAuthView(APIView):
                     {"detail": "Invalid or expired Google access token."},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
-            if data.get("email_verified") is False:
+            if not _google_userinfo_email_verified(data):
                 return Response(
                     {"detail": "Google email is not verified."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -224,11 +258,20 @@ class GoogleAuthView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        pic: str | None = None
+        if cred:
+            p = idinfo.get("picture")
+            pic = p if isinstance(p, str) else None
+        else:
+            p = data.get("picture")
+            pic = p if isinstance(p, str) else None
+        assign_avatar_from_url_if_empty(user, pic)
+
         blocked = _reject_staff_consumer_login(user)
         if blocked:
             return blocked
 
-        return Response(_issue_tokens(user))
+        return Response(_issue_tokens(user, request))
 
 
 class AppleAuthView(APIView):
@@ -282,7 +325,7 @@ class AppleAuthView(APIView):
         if blocked:
             return blocked
 
-        return Response(_issue_tokens(user))
+        return Response(_issue_tokens(user, request))
 
 
 class FacebookAuthView(APIView):
@@ -354,11 +397,47 @@ class FacebookAuthView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        assign_avatar_from_url_if_empty(user, facebook_profile_picture_url(data))
+
         blocked = _reject_staff_consumer_login(user)
         if blocked:
             return blocked
 
-        return Response(_issue_tokens(user))
+        return Response(_issue_tokens(user, request))
+
+
+class MemberProfileView(APIView):
+    """GET/PATCH current member profile (name, avatar)."""
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+
+    def get(self, request):
+        ser = ProfileSerializer(request.user, context={"request": request})
+        return Response(ser.data)
+
+    def patch(self, request):
+        ser = ProfileUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        request.user.refresh_from_db()
+        out = ProfileSerializer(request.user, context={"request": request})
+        return Response(out.data)
+
+
+class PasswordChangeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        ser = PasswordChangeSerializer(data=request.data, context={"request": request})
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return Response({"detail": "Password updated."})
 
 
 class StaffLoginView(APIView):
@@ -385,7 +464,7 @@ class StaffLoginView(APIView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
-        return Response(_issue_tokens(user))
+        return Response(_issue_tokens(user, request))
 
 
 class StaffPingView(APIView):

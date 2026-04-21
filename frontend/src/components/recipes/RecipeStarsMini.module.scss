@@ -1,0 +1,14 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.slot {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
