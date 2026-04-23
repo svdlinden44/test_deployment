@@ -42,23 +42,44 @@
 }
 
 .filtersBar {
-  padding: 1.25rem 1.5rem;
+  padding: 1.15rem 1.25rem 1.25rem;
   background: var(--dark2);
   border: 1px solid rgba(201, 168, 76, 0.12);
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.filtersRow {
+.filterPrimary {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: flex-end;
-  gap: 1rem 1.25rem;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
 
-  & + & {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(201, 168, 76, 0.08);
+.filterDims {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 440px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filterIngredients {
+  padding-top: 0.85rem;
+  margin-top: 0.15rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.1);
+
+  .field {
+    max-width: 100%;
   }
 }
 
@@ -67,8 +88,7 @@
   min-width: min(140px, 100%);
   text-align: left;
 
-  label,
-  .labelInline {
+  label {
     display: block;
     font-size: 0.72rem;
     letter-spacing: 0.12em;
@@ -79,8 +99,8 @@
 }
 
 .fieldGrow {
-  flex: 1 1 260px;
-  max-width: min(440px, 100%);
+  flex: 1 1 220px;
+  min-width: min(280px, 100%);
 }
 
 .input,
@@ -92,6 +112,23 @@
   background: rgba(0, 0, 0, 0.25);
   color: var(--cream);
   font-size: 0.95rem;
+
+  &::placeholder {
+    color: rgba(201, 168, 76, 0.62);
+    opacity: 1;
+  }
+}
+
+.selectUnset {
+  color: rgba(201, 168, 76, 0.72);
+
+  &:focus {
+    color: var(--cream);
+  }
+}
+
+.select:not(.selectUnset) {
+  color: var(--cream);
 }
 
 .suggest {
@@ -158,22 +195,23 @@
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
-  padding-bottom: 0.15rem;
 }
 
 .clearBtn {
-  padding: 0.5rem 1rem;
+  padding: 0.52rem 1rem;
   border-radius: 4px;
-  border: 1px solid rgba(201, 168, 76, 0.25);
+  border: 1px solid rgba(201, 168, 76, 0.28);
   background: transparent;
-  color: var(--cream-dim);
+  color: rgba(201, 168, 76, 0.82);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
 
   &:hover {
-    border-color: rgba(201, 168, 76, 0.45);
-    color: var(--cream);
+    border-color: rgba(201, 168, 76, 0.48);
+    color: var(--gold-lt);
   }
 }
 

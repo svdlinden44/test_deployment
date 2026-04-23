@@ -73,6 +73,10 @@
   position: relative;
 }
 
+/* Softer hover: slower ramp, mild lift, eased-out settle */
+$card-ease: cubic-bezier(0.33, 1, 0.32, 1);
+$card-dur: 0.58s;
+
 .card {
   display: flex;
   flex-direction: column;
@@ -83,14 +87,37 @@
   border-radius: 8px;
   overflow: hidden;
   background: var(--dark2);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
   transition:
-    border-color 0.18s ease,
-    transform 0.18s ease;
+    border-color $card-dur $card-ease,
+    transform $card-dur $card-ease,
+    box-shadow $card-dur $card-ease;
 
   &:hover {
-    border-color: rgba(201, 168, 76, 0.35);
+    border-color: rgba(201, 168, 76, 0.36);
     transform: translateY(-2px);
+    box-shadow:
+      0 12px 32px rgba(0, 0, 0, 0.28),
+      0 4px 12px rgba(201, 168, 76, 0.05);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    box-shadow: none;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.cardHeader {
+  flex-shrink: 0;
+  padding: 0.75rem 1rem 0.7rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.16);
+  background: linear-gradient(180deg, rgba(18, 14, 11, 0.98) 0%, rgba(14, 11, 9, 0.99) 100%);
+  text-align: center;
 }
 
 .cardImgWrap {
@@ -125,8 +152,8 @@
     pointer-events: none;
     opacity: 0.92;
     transition:
-      opacity 0.24s ease,
-      transform 0.24s ease;
+      opacity $card-dur $card-ease,
+      transform $card-dur $card-ease;
   }
 }
 
@@ -151,18 +178,32 @@
     drop-shadow(0 12px 36px rgba(0, 0, 0, 0.52))
     drop-shadow(0 22px 48px rgba(0, 0, 0, 0.38));
   transition:
-    filter 0.26s ease,
-    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    filter $card-dur $card-ease,
+    transform $card-dur $card-ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    .card:hover & {
+      transform: none;
+      filter:
+        drop-shadow(0 0 2px rgba(201, 168, 76, 0.45))
+        drop-shadow(0 0 4px rgba(201, 168, 76, 0.22))
+        drop-shadow(0 0 28px rgba(201, 168, 76, 0.18))
+        drop-shadow(0 12px 36px rgba(0, 0, 0, 0.52))
+        drop-shadow(0 22px 48px rgba(0, 0, 0, 0.38));
+    }
+  }
 }
 
 .card:hover .cardImgSubject {
   filter:
-    drop-shadow(0 0 3px rgba(201, 168, 76, 0.65))
-    drop-shadow(0 0 8px rgba(201, 168, 76, 0.38))
-    drop-shadow(0 0 42px rgba(201, 168, 76, 0.28))
-    drop-shadow(0 18px 52px rgba(0, 0, 0, 0.62))
-    drop-shadow(0 28px 60px rgba(0, 0, 0, 0.45));
-  transform: scale(1.048);
+    drop-shadow(0 0 3px rgba(201, 168, 76, 0.58))
+    drop-shadow(0 0 8px rgba(201, 168, 76, 0.32))
+    drop-shadow(0 0 38px rgba(201, 168, 76, 0.22))
+    drop-shadow(0 16px 48px rgba(0, 0, 0, 0.52))
+    drop-shadow(0 24px 52px rgba(0, 0, 0, 0.38));
+  transform: scale(1.026);
 }
 
 .cardImg {
@@ -194,10 +235,11 @@
 
 .cardTitle {
   font-family: 'Playfair Display', serif;
-  font-size: 1.15rem;
+  font-size: 1.08rem;
   font-weight: 500;
-  margin: 0 0 0.5rem;
-  line-height: 1.25;
+  margin: 0;
+  line-height: 1.28;
+  text-align: center;
 }
 
 .cardDesc {
@@ -216,6 +258,38 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(201, 168, 76, 0.65);
+}
+
+.cardIngredients {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 0.75rem;
+  align-items: start;
+}
+
+.cardIngredientCol {
+  min-width: 0;
+}
+
+.cardIngredientList {
+  margin: 0;
+  padding: 0 0 0 1rem;
+  font-size: 0.68rem;
+  line-height: 1.38;
+  color: rgba(236, 228, 216, 0.52);
+  list-style-type: disc;
+
+  li {
+    margin-bottom: 0.1rem;
+
+    &::marker {
+      color: rgba(201, 168, 76, 0.32);
+      font-size: 0.55rem;
+    }
+  }
 }
 
 .sentinel {

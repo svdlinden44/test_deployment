@@ -264,7 +264,7 @@ class TheCocktailDbImporter(BaseCatalogImporter):
         if show_progress and not dry_run:
             iterator = tqdm(id_list, desc="Catalog recipes", unit="drink", file=sys.stderr)
 
-        for ext_id in iterator:
+        for idx, ext_id in enumerate(iterator, start=1):
             try:
                 if dry_run:
                     exists = RecipeExternalRef.objects.filter(
@@ -283,6 +283,10 @@ class TheCocktailDbImporter(BaseCatalogImporter):
                     skip_images=skip_images,
                     with_ingredient_images=with_ingredient_images,
                     cutouts=cutouts,
+                    stdout=stdout,
+                    style=style,
+                    drink_index=idx,
+                    drink_total=len(id_list),
                 )
                 if created is True:
                     done += 1
@@ -427,6 +431,10 @@ class TheCocktailDbImporter(BaseCatalogImporter):
         skip_images: bool,
         with_ingredient_images: bool,
         cutouts: bool,
+        stdout: Any = None,
+        style: Any = None,
+        drink_index: int | None = None,
+        drink_total: int | None = None,
     ) -> bool | None:
         """Returns True if created/updated, False if skipped, None on weird empty payload."""
         data = self._get("lookup.php", {"i": ext_id})
@@ -435,6 +443,16 @@ class TheCocktailDbImporter(BaseCatalogImporter):
             return None
         d = drinks[0]
 
+        title = (d.get("strDrink") or "Untitled").strip()[:250]
+        if (
+            stdout
+            and style
+            and drink_index is not None
+            and drink_total is not None
+        ):
+            stdout.write(style.NOTICE(f"[{drink_index}/{drink_total}] {title}\n"))
+            stdout.flush()
+
         ref = RecipeExternalRef.objects.filter(
             source_key=self.source_key,
             external_id=str(ext_id),
@@ -442,7 +460,6 @@ class TheCocktailDbImporter(BaseCatalogImporter):
         if ref and not update:
             return False
 
-        title = (d.get("strDrink") or "Untitled").strip()[:250]
         instructions = _recipe_instructions(d.get("strInstructions"))
         description = _recipe_description(instructions)
 

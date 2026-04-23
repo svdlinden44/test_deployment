@@ -28,6 +28,13 @@ export interface CategoryDto {
   recipe_count?: number
 }
 
+/** List/card payload: enough to split spirits vs other ingredients on the UI. */
+export interface RecipeCardIngredientLine {
+  sort_order: number
+  ingredient_name: string
+  ingredient_type: string
+}
+
 export interface RecipeListItem {
   id: number
   slug: string
@@ -47,6 +54,8 @@ export interface RecipeListItem {
   /** Community average 1–5 when ratings exist (list/detail). */
   average_rating?: number | null
   rating_count?: number
+  /** Present on list endpoints for recipe cards. */
+  ingredients?: RecipeCardIngredientLine[]
 }
 
 /** PUT/PATCH/DELETE /api/me/ratings/:slug/ */
@@ -65,7 +74,7 @@ export interface RecipeIngredientLine {
   ingredient_slug: string
 }
 
-export interface RecipeDetail extends RecipeListItem {
+export interface RecipeDetail extends Omit<RecipeListItem, 'ingredients'> {
   instructions: string
   history: string
   ingredients: RecipeIngredientLine[]

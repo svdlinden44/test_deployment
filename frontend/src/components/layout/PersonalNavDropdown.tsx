@@ -4,7 +4,7 @@ import { PERSONAL_NAV_LINKS } from '@/components/layout/personalNavLinks'
 import { cn } from '@/lib/utils'
 import s from './PersonalNavDropdown.module.scss'
 
-function personalSectionActive(pathname: string): boolean {
+function accountSectionActive(pathname: string): boolean {
   if (pathname.startsWith('/favorites')) return true
   if (pathname.startsWith('/wishlist')) return true
   if (pathname.startsWith('/my-recipes')) return true
@@ -18,7 +18,7 @@ export function PersonalNavDropdown() {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLLIElement>(null)
 
-  const active = personalSectionActive(pathname)
+  const active = accountSectionActive(pathname)
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -39,9 +39,10 @@ export function PersonalNavDropdown() {
         className={s.trigger}
         aria-expanded={open}
         aria-haspopup="true"
+        aria-label="Account menu"
         onClick={() => setOpen((v) => !v)}
       >
-        Personal
+        Account
         <span className={s.chev} aria-hidden>
           ▾
         </span>
@@ -59,7 +60,7 @@ export function PersonalNavDropdown() {
                 role="menuitem"
                 onClick={() => setOpen(false)}
               >
-                <IconComp className={cn(s.menuIcon, item.iconClass)} />
+                <IconComp className={s.menuIcon} />
                 <span className={s.menuLabel}>{item.label}</span>
               </NavLink>
             </li>

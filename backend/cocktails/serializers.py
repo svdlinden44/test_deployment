@@ -28,6 +28,17 @@ class CategoryMiniSerializer(serializers.ModelSerializer):
         fields = ("slug", "name")
 
 
+class RecipeListIngredientSerializer(serializers.ModelSerializer):
+    """Compact ingredient lines for recipe cards (split spirits vs mixers on the client)."""
+
+    ingredient_name = serializers.CharField(source="ingredient.name", read_only=True)
+    ingredient_type = serializers.CharField(source="ingredient.type", read_only=True)
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ("sort_order", "ingredient_name", "ingredient_type")
+
+
 class RecipeListSerializer(serializers.ModelSerializer):
     category = CategoryMiniSerializer(read_only=True)
     image_url = serializers.SerializerMethodField()
@@ -36,6 +47,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     recipe_source = serializers.CharField(source="source", read_only=True)
     average_rating = serializers.SerializerMethodField()
     rating_count = serializers.SerializerMethodField()
+    ingredients = RecipeListIngredientSerializer(source="recipe_ingredients", many=True, read_only=True)
 
     class Meta:
         model = Recipe
@@ -55,6 +67,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
             "recipe_source",
             "average_rating",
             "rating_count",
+            "ingredients",
         )
 
     def get_image_url(self, obj: Recipe) -> str | None:
@@ -115,7 +128,6 @@ class RecipeDetailSerializer(RecipeListSerializer):
         fields = RecipeListSerializer.Meta.fields + (
             "instructions",
             "history",
-            "ingredients",
             "my_rating",
             "average_rating",
             "rating_count",

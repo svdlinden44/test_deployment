@@ -10,6 +10,7 @@ import type { CategoryDto, RecipeFilters, RecipeListItem, IngredientMini } from 
 import { ApiError } from '@/lib/api/types'
 import { ALCOHOL_OPTIONS, DIFFICULTY_OPTIONS, GLASS_OPTIONS } from '@/pages/Recipes/recipeMeta'
 import { LogoSpinner } from '@/components/ui/LogoSpinner'
+import { cn } from '@/lib/utils'
 import s from './Recipes.module.scss'
 
 type IngPick = { slug: string; name: string }
@@ -283,7 +284,7 @@ export function Recipes() {
 
       <div className={s.stack}>
         <section className={s.filtersBar} aria-label="Recipe filters">
-          <div className={s.filtersRow}>
+          <div className={s.filterPrimary}>
             <div className={`${s.field} ${s.fieldGrow}`}>
               <label htmlFor="rec-search">Search</label>
               <input
@@ -294,12 +295,19 @@ export function Recipes() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
+            <div className={s.clearWrap}>
+              <button type="button" className={s.clearBtn} onClick={clearFilters}>
+                Clear filters
+              </button>
+            </div>
+          </div>
 
+          <div className={s.filterDims} role="group" aria-label="Recipe attributes">
             <div className={s.field}>
               <label htmlFor="rec-cat">Category</label>
               <select
                 id="rec-cat"
-                className={s.select}
+                className={cn(s.select, !category && s.selectUnset)}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -317,7 +325,7 @@ export function Recipes() {
               <label htmlFor="rec-diff">Difficulty</label>
               <select
                 id="rec-diff"
-                className={s.select}
+                className={cn(s.select, !difficulty && s.selectUnset)}
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
               >
@@ -333,7 +341,7 @@ export function Recipes() {
               <label htmlFor="rec-glass">Glass</label>
               <select
                 id="rec-glass"
-                className={s.select}
+                className={cn(s.select, !glass && s.selectUnset)}
                 value={glass}
                 onChange={(e) => setGlass(e.target.value)}
               >
@@ -349,7 +357,7 @@ export function Recipes() {
               <label htmlFor="rec-alc">Style</label>
               <select
                 id="rec-alc"
-                className={s.select}
+                className={cn(s.select, !alcoholic && s.selectUnset)}
                 value={alcoholic}
                 onChange={(e) => setAlcoholic(e.target.value as typeof alcoholic)}
               >
@@ -362,15 +370,16 @@ export function Recipes() {
             </div>
           </div>
 
-          <div className={s.filtersRow}>
+          <div className={s.filterIngredients}>
             <div className={`${s.field} ${s.fieldGrow}`}>
-              <span className={s.labelInline}>Ingredients</span>
+              <label htmlFor="rec-ing">Ingredients</label>
               <input
+                id="rec-ing"
                 className={s.input}
                 value={ingSearch}
                 placeholder="Type 2+ letters to search…"
                 onChange={(e) => setIngSearch(e.target.value)}
-                aria-label="Search ingredients"
+                aria-label="Search ingredients by name"
               />
               {ingSuggestions.length > 0 && (
                 <ul className={s.suggest}>
@@ -408,12 +417,6 @@ export function Recipes() {
                   Match <strong>all</strong> selected ingredients
                 </label>
               )}
-            </div>
-
-            <div className={s.clearWrap}>
-              <button type="button" className={s.clearBtn} onClick={clearFilters}>
-                Clear filters
-              </button>
             </div>
           </div>
         </section>

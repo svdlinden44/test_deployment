@@ -1,9 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useId, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { PersonalNavDropdown } from '@/components/layout/PersonalNavDropdown'
 import { PERSONAL_NAV_LINKS } from '@/components/layout/personalNavLinks'
-import { useMobileLogoScrollStyle } from '@/hooks/useMobileLogoScrollStyle'
-import { useScrolledNav } from '@/hooks/useScrolledNav'
+import { useNavbarLogoScrollStyle } from '@/hooks/useNavbarLogoScrollStyle'
 import { useAuth } from '@/contexts/AuthContext'
 import type { AuthUser } from '@/lib/api/types'
 import { cn } from '@/lib/utils'
@@ -19,11 +18,17 @@ function initialsFromUser(user: AuthUser): string {
   return raw.slice(0, 2).toUpperCase()
 }
 
-function NavbarAvatar({ user }: { user: AuthUser }) {
+function NavbarAvatar({
+  user,
+  chipStyle,
+}: {
+  user: AuthUser
+  chipStyle: CSSProperties
+}) {
   const url = user.avatar_url
   const initials = initialsFromUser(user)
   return (
-    <span className={s.avatarChip}>
+    <span className={cn(s.avatarChip, s.avatarChipDynamic)} style={chipStyle}>
       {url ? (
         <img src={url} alt="" className={s.avatarImg} />
       ) : (
@@ -34,8 +39,7 @@ function NavbarAvatar({ user }: { user: AuthUser }) {
 }
 
 export function Navbar() {
-  const scrolled = useScrolledNav(60)
-  const mobileLogoStyle = useMobileLogoScrollStyle()
+  const { logoStyle, navShellStyle, avatarChipStyle } = useNavbarLogoScrollStyle()
   const { user, logout } = useAuth()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -62,13 +66,13 @@ export function Navbar() {
   }, [menuOpen])
 
   return (
-    <nav className={cn(s.nav, scrolled && s.scrolled)}>
+    <nav className={s.nav} style={navShellStyle}>
       <Link to="/" className={s.logo}>
         <img
           src="/images/logo-banner.png"
           alt="The Distillist"
-          className={cn(s.logoImg, mobileLogoStyle && s.logoImgDynamic)}
-          style={mobileLogoStyle}
+          className={cn(s.logoImg, s.logoImgDynamic)}
+          style={logoStyle}
         />
       </Link>
 
@@ -135,7 +139,7 @@ export function Navbar() {
 
         {user ? (
           <Link to="/profile" className={s.avatarLink} aria-label="My Profile">
-            <NavbarAvatar user={user} />
+            <NavbarAvatar user={user} chipStyle={avatarChipStyle} />
           </Link>
         ) : null}
 
@@ -231,9 +235,7 @@ export function Navbar() {
                 </li>
                 {user ? (
                   <>
-                    <li>
-                      <span className={s.drawerSectionLabel}>Personal</span>
-                    </li>
+                    <li className={s.drawerDivider} role="presentation" />
                     {PERSONAL_NAV_LINKS.map((item) => {
                       const IconComp = item.Icon
                       return (
@@ -245,7 +247,7 @@ export function Navbar() {
                             }
                             onClick={() => setMenuOpen(false)}
                           >
-                            <IconComp className={cn(pnd.menuIcon, item.iconClass)} />
+                            <IconComp className={pnd.menuIcon} />
                             <span className={pnd.menuLabel}>{item.label}</span>
                           </NavLink>
                         </li>

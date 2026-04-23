@@ -105,7 +105,7 @@ class RecipeListView(ListAPIView):
             wl = RecipeWishlist.objects.filter(user=user, recipe_id=OuterRef("pk"))
             qs = qs.annotate(is_favorited=Exists(fav), is_wishlisted=Exists(wl))
         qs = qs.annotate(_rating_avg=Avg("ratings__score"), _rating_count=Count("ratings"))
-        return qs
+        return qs.prefetch_related("recipe_ingredients__ingredient")
 
 
 class RecipeDetailView(RetrieveAPIView):
@@ -181,6 +181,7 @@ class MyFavoritesListView(ListAPIView):
                 _rating_count=Count("ratings"),
             )
             .order_by("-favorited_by__created_at")
+            .prefetch_related("recipe_ingredients__ingredient")
         )
 
 
@@ -225,6 +226,7 @@ class MyWishlistListView(ListAPIView):
                 _rating_count=Count("ratings"),
             )
             .order_by("-wishlisted_by__created_at")
+            .prefetch_related("recipe_ingredients__ingredient")
         )
 
 
@@ -358,6 +360,7 @@ class MemberRecipeListCreateView(ListCreateAPIView):
                 _rating_count=Count("ratings"),
             )
             .order_by("-created_at")
+            .prefetch_related("recipe_ingredients__ingredient")
         )
 
 
